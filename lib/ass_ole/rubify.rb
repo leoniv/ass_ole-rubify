@@ -1,3 +1,4 @@
+require 'ass_ole'
 require "ass_ole/rubify/version"
 
 module AssOle
