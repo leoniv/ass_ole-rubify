@@ -6,4 +6,8 @@ module AssOle::RubifyTest
       ::AssOle::Rubify::VERSION.wont_be_nil
     end
   end
+
+  describe AssOle::Rubify::MdManagers do
+
+  end
 end
