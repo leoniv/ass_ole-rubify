@@ -18,7 +18,14 @@ All custom wrappers, can includes various mixins for dynamic generated
 wrapper API and always yields instance in end of constructor where instance
 can be extended would you like.
 
-FIXME: Custom wrappers separated on two groups. `MdTreeObjects` and `ApplicationObjects`
+FIXME:
+>  Custom wrappers included into `AssOle::Rubify::SchemaObjects` namespace
+>  wrapps objects defined in 1C application *Meta Data Tree*.
+>  In 1C term sach objects named as *Applied Objects*.
+>  All wrappers from `SchemaObjects` holds therd thing `md_manger` instance wich
+>  wrapp *Objects manager* like *Catalogs.CatalogName*, *Documents.DocumentName*
+>  etc. Wrappers for `md_manger` dynamicaly generated in
+>  `AssOle::Rubify::MdManagers` namespace for specific 1C application instance.
 
 ## Installation
 
