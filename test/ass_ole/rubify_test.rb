@@ -40,8 +40,6 @@ module AssOle::RubifyTest
         end
 
         it '.get returns nil' do
-          require 'pry'
-          binding.pry
           AssOle::Rubify::Support::XmlType.get(:symbol, ole_runtime_get).must_be_nil
         end
       end
