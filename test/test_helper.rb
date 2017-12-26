@@ -26,7 +26,14 @@ module AssOle::RubifyTest
       is_ole_runtime :external
       run Env::IB
     end
+
+    module Thin
+      is_ole_runtime :thin
+      run Env::IB
+      ole_connector.Visible = false
+    end
   end
 end
 
 require "minitest/autorun"
+require 'mocha/mini_test'

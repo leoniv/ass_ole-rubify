@@ -50,6 +50,7 @@ module AssOle
     #    end
     #  end
     module MdManagers
+      require 'ass_ole/snippets/shared'
       class TooManyObjectsFoundError < StandardError; end
 
       # @api private
