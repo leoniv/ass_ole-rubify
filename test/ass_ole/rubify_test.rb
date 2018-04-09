@@ -109,7 +109,7 @@ module AssOle::RubifyTest
 
     describe 'tests with stubed klass' do
       def klass
-        @klass ||= Class.new(klass) do
+        @klass ||= Class.new(super) do
           def initialize(ole, ole_runtime)
             @ole = ole
             @ole_runtime = ole_runtime
