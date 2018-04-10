@@ -59,6 +59,17 @@ module AssOle::RubifyTest
           runtimed.ole_runtime_get.xml_type_get(runtimed.WebColors.Aquamarine)
             .must_be_nil
         end
+
+        it '#spawned? false' do
+          ruby_ole = mock
+          ruby_ole.stubs(__ruby__?: true)
+          runtimed.ole_runtime_get.spawned?('string').must_equal false
+          runtimed.ole_runtime_get.spawned?(ruby_ole).must_equal false
+        end
+
+        it '#spawned? true' do
+          runtimed.ole_runtime_get.spawned?(runtimed.WebColors.Aquamarine).must_equal true
+        end
       end
     end
 

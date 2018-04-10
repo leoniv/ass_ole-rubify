@@ -96,6 +96,19 @@ module AssOle
           xmlt.TypeName
         end
       end
+
+      # Detects that an ole object, spawned by an ole runtime
+      module Spawned
+        # Returns +true+ if runtime spawn +ole+ object. Always returns
+        # +false+ if +ole+ is't +WIN32OLE+ instance or +ole+ is Ryby object
+        # wrapped in +WIN32OLE+.
+        # @param ole [WIN32OLE]
+        def spawned?(ole)
+          return false unless ole.is_a? WIN32OLE
+          return false if ole.__ruby__?
+          !ole_connector.sTring(ole).nil?
+        end
+      end
     end
 
     # Rubify patches for 'ass_ole'
@@ -104,12 +117,14 @@ module AssOle
       module External
         include Runtimes::Patches::StringInternal
         include Runtimes::Patches::XmlTypeGet
+        include Runtimes::Patches::Spawned
       end
 
       # Rubify patches for 'ass_ole'
       module Thick
         include Runtimes::Patches::StringInternal
         include Runtimes::Patches::XmlTypeGet
+        include Runtimes::Patches::Spawned
       end
 
       # Rubify patches for 'ass_ole'
@@ -118,6 +133,7 @@ module AssOle
       # @note (see Runtimes::Patches::StringInternal)
       module Thin
         include Runtimes::Patches::XmlTypeGet
+        include Runtimes::Patches::Spawned
         # (see Runtimes::Patches::StringInternal#to_string_internal)
         # @raise [NotImplementedError]
         def to_string_internal(value)

@@ -34,6 +34,13 @@ module AssOle::RubifyTest
     like_ole_runtime Runtimes::Ext
     include AssOle::Snippets::Shared::Array
 
+    def other_ole_runtime
+      Class.new do
+        like_ole_runtime Runtimes::Thin
+        include AssOle::Snippets::Shared::Array
+      end.new
+    end
+
     def klass
       AssOle::Rubify::GenericWrapper
     end
@@ -42,8 +49,13 @@ module AssOle::RubifyTest
       array
     end
 
-    def ruby_ole_obj
-      array(:hash).Get(0)
+    def invalid_ole_obj
+      other_ole_runtime.array
+    end
+
+    it '#to_s' do
+      klass.new(valid_ole_obj, ole_runtime_get).to_s.must_match %r{Массив|Array}i
+      klass.new(invalid_ole_obj, ole_runtime_get).to_s.must_be :empty?
     end
 
     it 'include? Support::SendToOle' do
@@ -70,7 +82,7 @@ module AssOle::RubifyTest
 
         it "if ole isn't spawned ole_runtime" do
           e = proc {
-            klass.new(ruby_ole_obj, ole_runtime_get)
+            klass.new(invalid_ole_obj, ole_runtime_get)
           }.must_raise ArgumentError
           e.message.must_match %r{ole must be spawned by ole_runtime}i
         end

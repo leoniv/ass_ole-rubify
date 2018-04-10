@@ -47,7 +47,7 @@ module AssOle
       end
 
       def to_s
-        ole_connector.sTring(ole)
+        ole_connector.sTring(ole).to_s
       end
 
       # @return (see Patches::StringInternal#to_string_internal)
@@ -64,7 +64,7 @@ module AssOle
         fail ArgumentError, "ole must be `WIN32OLE`"\
           " instance not a `#{ole.class}`" unless ole.is_a? WIN32OLE
         fail ArgumentError, 'ole must be spawned'\
-          ' by ole_runtime' if to_s =~ %r{^ComObject$}i
+          ' by ole_runtime' unless ole_runtime.spawned? ole
       end
       private :verify!
     end
