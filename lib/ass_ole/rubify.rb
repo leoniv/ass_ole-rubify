@@ -29,28 +29,10 @@ module AssOle
           ole.send(symbol, *args)
         end
       end
-
-      # Get name of +XmlType+
-      module XmlType
-        # @return (see .get)
-        def xml_type
-          XmlType.get(ole, ole_runtime)
-        end
-
-        # @param ole [WIN32OLE]
-        # @param ole_runtime [#ole_connector] 1C ole runtime
-        # @return [String nil] name of +ole+ +XmlType+
-        def self.get(ole, ole_runtime)
-          xmlt = ole_runtime.ole_connector.XmlTypeOf(ole)
-          return unless xmlt
-          xmlt.TypeName
-        end
-      end
     end
 
     class GenericWrapper
       include Support::SendToOle
-      include Support::XmlType
 
       attr_reader :ole, :ole_runtime
       def initialize(ole, ole_runtime)
@@ -68,8 +50,14 @@ module AssOle
         ole_connector.sTring(ole)
       end
 
+      # @return (see Patches::StringInternal#to_string_internal)
       def to_string_internal
         ole_runtime.to_string_internal(ole)
+      end
+
+      # @return (see Patches::XmlTypeGet#xml_type_get)
+      def xml_type
+        ole_runtime.xml_type_get(ole)
       end
 
       def verify!

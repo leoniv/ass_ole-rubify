@@ -30,32 +30,6 @@ module AssOle::RubifyTest
     end
   end
 
-  describe AssOle::Rubify::Support::XmlType do
-    module XmlTypeTest
-      module SharedTests
-        extend Minitest::Spec::DSL
-
-        it '.get returns Nubmer' do
-          AssOle::Rubify::Support::XmlType.get(1, ole_runtime_get).must_equal 'decimal'
-        end
-
-        it '.get returns nil' do
-          AssOle::Rubify::Support::XmlType.get(:symbol, ole_runtime_get).must_be_nil
-        end
-      end
-    end
-
-    describe 'tests in serever context' do
-      like_ole_runtime Runtimes::Ext
-      include XmlTypeTest::SharedTests
-    end
-
-    describe 'tests in client context' do
-      like_ole_runtime Runtimes::Thin
-      include XmlTypeTest::SharedTests
-    end
-  end
-
   describe AssOle::Rubify::GenericWrapper do
     like_ole_runtime Runtimes::Ext
     include AssOle::Snippets::Shared::Array
@@ -74,10 +48,6 @@ module AssOle::RubifyTest
 
     it 'include? Support::SendToOle' do
       assert klass.include? AssOle::Rubify::Support::SendToOle
-    end
-
-    it 'include? Support::XmlType' do
-      assert klass.include? AssOle::Rubify::Support::XmlType
     end
 
     describe '#initialize' do
@@ -118,9 +88,19 @@ module AssOle::RubifyTest
       end
 
       it '#xml_type' do
-        inst = klass.new(:ole, :ole_runtime)
-        AssOle::Rubify::Support::XmlType.expects(:get).with(:ole, :ole_runtime).returns(:xml_type)
+        ole_runtime = mock
+        ole_runtime.responds_like(Runtimes::Ext)
+        ole_runtime.expects(:xml_type_get).with(:ole).returns(:xml_type)
+        inst = klass.new(:ole, ole_runtime)
         inst.xml_type.must_equal :xml_type
+      end
+
+      it '#to_string_internal' do
+        ole_runtime = mock
+        ole_runtime.responds_like(Runtimes::Ext)
+        ole_runtime.expects(:to_string_internal).with(:ole).returns(:str_internal)
+        inst = klass.new(:ole, ole_runtime)
+        inst.to_string_internal.must_equal :str_internal
       end
     end
   end

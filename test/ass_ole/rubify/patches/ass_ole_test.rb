@@ -48,14 +48,23 @@ module AssOle::RubifyTest
         end
       end
 
-      module AllRutimes
+      module AllRuntimes
         extend Minitest::Spec::DSL
 
+        it '#xml_type_get is string' do
+          runtimed.ole_runtime_get.xml_type_get('value').must_equal 'string'
+        end
+
+        it '#xml_type_get is nil' do
+          runtimed.ole_runtime_get.xml_type_get(runtimed.WebColors.Aquamarine)
+            .must_be_nil
+        end
       end
     end
 
     describe AssOle::Runtimes::App::Thick do
       include SharedTests::SrvRuntimes
+      include SharedTests::AllRuntimes
       def runtimed
         @runtimed ||= Module.new do
           like_ole_runtime Runtimes::Thick
@@ -69,6 +78,7 @@ module AssOle::RubifyTest
 
     describe AssOle::Runtimes::App::External do
       include SharedTests::SrvRuntimes
+      include SharedTests::AllRuntimes
       def runtimed
         @runtimed ||= Module.new do
           like_ole_runtime Runtimes::External
@@ -82,6 +92,7 @@ module AssOle::RubifyTest
 
     describe AssOle::Runtimes::App::Thin do
       describe 'Pure (not implements StringInternal interface)' do
+        include SharedTests::AllRuntimes
         def runtimed
           @runtimed ||= Module.new do
             like_ole_runtime Runtimes::Thin::Pure
@@ -108,6 +119,7 @@ module AssOle::RubifyTest
       end
 
       describe 'StrInternalImplemented' do
+        include SharedTests::AllRuntimes
         def runtimed
           @runtimed ||= Module.new do
             like_ole_runtime Runtimes::Thin::StrInternalImplemented

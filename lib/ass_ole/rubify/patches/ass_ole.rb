@@ -83,6 +83,19 @@ module AssOle
           ole_connector.ValueFromStringInternal(str)
         end
       end
+
+      # Mixin for get name of +XmlType+
+      module XmlTypeGet
+        # Returns name of 1C +XmlType+ for +value+. If +XmlType+ not defined for
+        # +value+ returns nil.
+        # @param value any value
+        # @return [String nil]  +XmlType.TypeName+ of +value+
+        def xml_type_get(value)
+          xmlt = ole_connector.XmlTypeOf(value)
+          return unless xmlt
+          xmlt.TypeName
+        end
+      end
     end
 
     # Rubify patches for 'ass_ole'
@@ -90,11 +103,13 @@ module AssOle
       # Rubify patches for 'ass_ole'
       module External
         include Runtimes::Patches::StringInternal
+        include Runtimes::Patches::XmlTypeGet
       end
 
       # Rubify patches for 'ass_ole'
       module Thick
         include Runtimes::Patches::StringInternal
+        include Runtimes::Patches::XmlTypeGet
       end
 
       # Rubify patches for 'ass_ole'
@@ -102,6 +117,7 @@ module AssOle
       # @example (see Runtimes::Patches::StringInternal)
       # @note (see Runtimes::Patches::StringInternal)
       module Thin
+        include Runtimes::Patches::XmlTypeGet
         # (see Runtimes::Patches::StringInternal#to_string_internal)
         # @raise [NotImplementedError]
         def to_string_internal(value)
