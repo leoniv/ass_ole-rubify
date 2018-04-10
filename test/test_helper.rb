@@ -36,4 +36,4 @@ module AssOle::RubifyTest
 end
 
 require "minitest/autorun"
-require 'mocha/mini_test'
+require 'mocha/minitest'

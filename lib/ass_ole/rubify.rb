@@ -1,5 +1,5 @@
 require 'ass_ole'
-
+require 'ass_ole/rubify/patches/ass_ole'
 module AssOle
   # @example
   #   class Worker
@@ -15,6 +15,9 @@ module AssOle
   module Rubify
     require "ass_ole/rubify/version"
     require 'ass_ole/rubify/md_managers'
+
+    # Define server context ole runtimes
+    SRV_RUNTIMES = [:thick, :external]
 
     # Helpers mixin
     module Support
@@ -63,6 +66,10 @@ module AssOle
 
       def to_s
         ole_connector.sTring(ole)
+      end
+
+      def to_string_internal
+        ole_runtime.to_string_internal(ole)
       end
 
       def verify!
