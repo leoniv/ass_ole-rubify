@@ -55,7 +55,6 @@ module AssOle::RubifyTest
 
     it '#to_s' do
       klass.new(valid_ole_obj, ole_runtime_get).to_s.must_match %r{Массив|Array}i
-      klass.new(invalid_ole_obj, ole_runtime_get).to_s.must_be :empty?
     end
 
     it 'include? Support::SendToOle' do
@@ -114,6 +113,43 @@ module AssOle::RubifyTest
         inst = klass.new(:ole, ole_runtime)
         inst.to_string_internal.must_equal :str_internal
       end
+    end
+  end
+
+  describe AssOle::Rubify do
+    like_ole_runtime Runtimes::Ext
+
+    describe '.rubify' do
+      it 'when ole is WIN32OLE' do
+#FIXME        AssOle::Rubify::GenericWrapper.expects(:new)
+#FIXME          .with(valid_ole_obj, ole_runtime_get).returns(:wrapper)
+#FIXME        AssOle::Rubify.rubify(valid_ole_obj, ole_runtime_get).must_equal :wrapper
+        skip "FIXME"
+      end
+
+      it 'when ole is StringInternal' do
+        skip 'FIXME'
+      end
+
+      it 'when ole is Xml string' do
+        skip 'FIXME'
+      end
+
+      it 'when ole is nil' do
+        AssOle::Rubify.rubify(nil, ole_runtime_get).must_be_nil
+      end
+
+      it 'fail ArgumentError when ole is ivalid' do
+        skip 'FIXME'
+      end
+    end
+
+    it '#rubify' do
+      AssOle::Rubify.expects(:rubify).with(:ole, ole_runtime_get).returns(:wrapper)
+      Class.new do
+        like_ole_runtime Runtimes::Ext
+        include AssOle::Rubify
+      end.new.rubify(:ole).must_equal :wrapper
     end
   end
 end

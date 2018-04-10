@@ -1,13 +1,23 @@
 require 'ass_ole'
 require 'ass_ole/rubify/patches/ass_ole'
 module AssOle
-  # @example
+  # @example Usage as Mixin
   #   class Worker
   #     like_ole_runtime ExternalRuntime
   #     include AssOle::Rubify
   #
   #     def document
   #       rubify document_get
+  #     end
+  #   end
+  #
+  #   Worker.new.document.exist?
+  # @example Usage as module method
+  #   class Worker
+  #     like_ole_runtime ExternalRuntime
+  #
+  #     def document
+  #       AssOle::Rubify.rubify(document_get, ole_runtime_get)
   #     end
   #   end
   #
@@ -31,10 +41,15 @@ module AssOle
       end
     end
 
+    # Basic wrapper for 1C ole object.
     class GenericWrapper
       include Support::SendToOle
 
       attr_reader :ole, :ole_runtime
+
+      # @raise ArgumentError if +ole+ invalid
+      # @param ole [WIN32OLE] wrapped ole object
+      # @param ole_runtime ole rutime which spawn +ole+ object
       def initialize(ole, ole_runtime)
         @ole = ole
         @ole_runtime = ole_runtime
@@ -42,10 +57,12 @@ module AssOle
         verify!
       end
 
+      # @return +ole_runtime.ole_connector+ ole connector to infobase
       def ole_connector
         ole_runtime.ole_connector
       end
 
+      # @return [String] +ole+ objet's string representation
       def to_s
         ole_connector.sTring(ole).to_s
       end
@@ -69,11 +86,18 @@ module AssOle
       private :verify!
     end
 
+    # @param ole (see GenericWrapper#initialize)
+    # @return [GenericWrapper nil] wrapper for 1C +ole+ object or +nil+ if
+    #  +ole.nil?+
     def rubify(ole)
       AssOle::Rubify.rubify(ole, ole_runtime_get)
     end
 
+    # @param (see GenericWrapper#initialize)
+    # @return [GenericWrapper nil] wrapper for 1C +ole+ object or +nil+ if
+    #  +ole.nil?+
     def self.rubify(ole, ole_runtime)
+      return ole if ole.nil?
       fail 'FIXME'
     end
   end
