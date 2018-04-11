@@ -9,6 +9,8 @@ module AssOle
       # @raise ArgumentError if +ole+ or +owner+ invalid
       # @param ole [WIN32OLE] wrapped ole object
       # @param ole_runtime ole rutime which spawn +ole+ object
+      # @parm owner [GenericWrapper nil] wrapper which spawn this wrapper
+      #  in {#\_wrapp_ole_result\_}
       # @api private
       def initialize(ole, ole_runtime, owner)
         @ole = ole

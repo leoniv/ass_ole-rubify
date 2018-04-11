@@ -97,21 +97,28 @@ module AssOle::RubifyTest
 
   describe AssOle::Rubify do
     like_ole_runtime Runtimes::Ext
+    include AssOle::Snippets::Shared::XMLSerializer
 
     describe '.rubify' do
       it 'when ole is WIN32OLE' do
-#FIXME        AssOle::Rubify::GenericWrapper.expects(:new)
-#FIXME          .with(valid_ole_obj, ole_runtime_get).returns(:wrapper)
-#FIXME        AssOle::Rubify.rubify(valid_ole_obj, ole_runtime_get).must_equal :wrapper
-        skip "FIXME"
+        ole = newObject('Array')
+        AssOle::Rubify::GenericWrapper.expects(:new)
+          .with(ole, ole_runtime_get, nil).returns(:wrapper)
+        AssOle::Rubify.rubify(ole, ole_runtime_get).must_equal :wrapper
       end
 
       it 'when ole is StringInternal' do
-        skip 'FIXME'
+        str = ole_runtime_get.to_string_internal(newObject('array'))
+        AssOle::Rubify::GenericWrapper.expects(:new)
+          .with(is_a(WIN32OLE), ole_runtime_get, nil).returns(:wrapper)
+        AssOle::Rubify.rubify(str, ole_runtime_get).must_equal :wrapper
       end
 
       it 'when ole is Xml string' do
-        skip 'FIXME'
+        xml = to_xml(newObject('array'))
+        AssOle::Rubify::GenericWrapper.expects(:new)
+          .with(is_a(WIN32OLE), ole_runtime_get, nil).returns(:wrapper)
+        AssOle::Rubify.rubify(xml, ole_runtime_get).must_equal :wrapper
       end
 
       it 'when ole is nil' do
@@ -119,16 +126,57 @@ module AssOle::RubifyTest
       end
 
       it 'fail ArgumentError when ole is ivalid' do
-        skip 'FIXME'
+        e = proc {
+          AssOle::Rubify.rubify(:invalid, nil)
+        }.must_raise ArgumentError
+        e.message.must_match %r{Unknown ole}
+      end
+
+      it 'smoky' do
+        xml = to_xml(newObject('array'))
+        actual = AssOle::Rubify.rubify(xml, ole_runtime_get)
+        actual.must_be_instance_of AssOle::Rubify::GenericWrapper
+        actual.owner.must_be_nil
+        actual.to_s.must_match %r{Array|Массив}
+        actual.ole_runtime.must_equal ole_runtime_get
       end
     end
 
-    it '#rubify' do
-      AssOle::Rubify.expects(:rubify).with(:ole, ole_runtime_get).returns(:wrapper)
-      Class.new do
-        like_ole_runtime Runtimes::Ext
-        include AssOle::Rubify
-      end.new.rubify(:ole).must_equal :wrapper
+    describe '#rubify' do
+      it 'smoky' do
+        actual = Class.new do
+          like_ole_runtime Runtimes::Ext
+          include AssOle::Rubify
+        end.new.rubify(newObject('Array'))
+        actual.must_be_instance_of AssOle::Rubify::GenericWrapper
+        actual.to_s.must_match %r{Array|Массив}
+        actual.owner.must_be_nil
+        actual.ole_runtime.must_equal ole_runtime_get
+      end
+
+      it 'mocked' do
+        AssOle::Rubify.expects(:rubify).with(:ole, ole_runtime_get).returns(:wrapper)
+        Class.new do
+          like_ole_runtime Runtimes::Ext
+          include AssOle::Rubify
+        end.new.rubify(:ole).must_equal :wrapper
+      end
+    end
+
+    it '.like_string_internal?' do
+      AssOle::Rubify.like_string_internal?("{\n}").must_equal true
+      AssOle::Rubify.like_string_internal?("0{\n}").must_equal false
+    end
+
+    it '.like_xml?' do
+      AssOle::Rubify.like_xml?('  <?xml').must_equal true
+      AssOle::Rubify.like_xml?('  <bla').must_equal true
+      AssOle::Rubify.like_xml?('bla <?xml').must_equal false
+    end
+
+    it '.from_xml' do
+      xml = to_xml(newObject('array'))
+      AssOle::Rubify.from_xml(xml, ole_runtime_get).must_be_instance_of WIN32OLE
     end
   end
 end
