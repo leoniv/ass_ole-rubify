@@ -31,12 +31,55 @@ module AssOle
 
     # Helpers mixin
     module Support
+      module FillAttributes
+        def _fill_attributes_(obj, **attributes)
+          attributes.each do |k, v|
+            obj.send("#{k}=", v)
+          end
+          obj
+        end
+        private :_fill_attributes_
+      end
+
+      module ExtractArgs
+        def _extract_opts_(opts)
+          opts.map {|k, v| [k, _extarct_ole_(v)]}.to_h
+        end
+        private :_extract_opts_
+
+        def _extract_args_(args)
+          args.map {|a| _extarct_ole_ a}
+        end
+        private :_extract_args_
+
+        def _extarct_ole_(val)
+          val.is_a?(GenericWrapper) ? val.ole : val
+        end
+        private :_extarct_ole_
+      end
+
       # Send message to +ole+ in {#method_missing}
       module SendToOle
-        def method_missing(symbol, *args)
-          fail ArgumentError, 'All included `SendToOle`'\
-            ' must respond_to? `:ole`' if symbol == :ole
-          ole.send(symbol, *args)
+        include FillAttributes
+        include ExtractArgs
+
+        def self.fail_must_respond_to_ole(symbol)
+          fail ArgumentError,
+            'All included `SendToOle` must respond_to? `:ole`' if symbol == :ole
+        end
+
+        def method_missing(symbol, *args, **opts, &block)
+          SendToOle.fail_must_respond_to_ole(symbol)
+
+          result = _fill_attributes_(ole.send(symbol, *_extract_args_(args)),
+                                     **_extract_opts_(opts))
+
+          result = GenericWrapper.new(result, ole_runtime, self) if\
+            ole_runtime.spawned? result
+
+          yield result if block_given?
+
+          result
         end
       end
     end
@@ -45,14 +88,16 @@ module AssOle
     class GenericWrapper
       include Support::SendToOle
 
-      attr_reader :ole, :ole_runtime
+      attr_reader :ole, :ole_runtime, :owner
 
-      # @raise ArgumentError if +ole+ invalid
+      # @raise ArgumentError if +ole+ or +owner+ invalid
       # @param ole [WIN32OLE] wrapped ole object
       # @param ole_runtime ole rutime which spawn +ole+ object
-      def initialize(ole, ole_runtime)
+      # @api private
+      def initialize(ole, ole_runtime, owner)
         @ole = ole
         @ole_runtime = ole_runtime
+        @owner = owner
         yield self if block_given?
         verify!
       end
@@ -77,11 +122,22 @@ module AssOle
         ole_runtime.xml_type_get(ole)
       end
 
+      def root_owner?
+        owner.nil?
+      end
+
+      def root_owner
+        return self if root_owner?
+        owner.root_owner
+      end
+
       def verify!
         fail ArgumentError, "ole must be `WIN32OLE`"\
           " instance not a `#{ole.class}`" unless ole.is_a? WIN32OLE
         fail ArgumentError, 'ole must be spawned'\
           ' by ole_runtime' unless ole_runtime.spawned? ole
+        fail ArgumentError, 'owner must be a GenericWrapper or nil' unless\
+          owner.nil? || owner.is_a?(GenericWrapper)
       end
       private :verify!
     end
