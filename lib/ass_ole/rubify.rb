@@ -32,7 +32,8 @@ module AssOle
     require 'ass_ole/rubify/generic_wrapper'
     require 'ass_ole/rubify/md_managers'
 
-    # @param ole (see .rubify)
+    # @param ole [WIN32OLE String] if passed +String+ expects xml or
+    #  +StringInternal+
     # @return [GenericWrapper nil] wrapper for 1C +ole+ object or +nil+ if
     #  +ole.nil?+
     def rubify(ole)

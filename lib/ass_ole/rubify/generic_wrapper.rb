@@ -1,17 +1,67 @@
 module AssOle
   module Rubify
     # Basic wrapper for 1C ole object.
+    # All OLE objects returned +ole+ automatically wraps to {GenericWrapper}
+    # in {GenericWrapper#\_wrapp_ole_result_}. Wrapper who spawns new wrapper
+    # will be {GenericWrapper#owner} for new wrapper. Accordingly wrappers
+    # builds hierarchical wrappers tree.
+    # @example Hierarchical wrappers tree
+    #   require 'ass_ole/rubify'
+    #   # It's gem ass_maintainer-info_bases
+    #   require 'ass_maintainer/info_bases/tmp_info_base'
+    #
+    #   module Runtimes
+    #     module External
+    #       is_ole_runtime :external
+    #       run AssMaintainer::InfoBases::TmpInfoBase.new.make
+    #     end
+    #   end
+    #
+    #   module Example
+    #     like_ole_runtime Runtimes::External
+    #     extend AssOle::Rubify
+    #
+    #     md = rubify(mEtadata) #=> <AssOle::Rubify::GenericWrapper:0x2104b00c>
+    #
+    #     md.to_s #=> "ОбъектМетаданныхКонфигурация"
+    #
+    #     md.owner #=> nil
+    #
+    #     md.root_owner? #=> true
+    #
+    #     md.root_owner #=> <AssOle::Rubify::GenericWrapper:0x2104b00c>
+    #
+    #     md.Name #=> "Конфигурация"
+    #
+    #     catalogs = md.Catalogs #=> <AssOle::Rubify::GenericWrapper:0x203fb810>
+    #
+    #     catalogs.owner #=> <AssOle::Rubify::GenericWrapper:0x2104b00c>
+    #
+    #     catalogs.root_owner? #=> false
+    #
+    #     catalogs.root_owner #=> <AssOle::Rubify::GenericWrapper:0x2104b00c>
+    #   end
+    #
+    #
     class GenericWrapper
       include Support::SendToOle
 
-      attr_reader :ole, :ole_runtime, :owner
+      # See +ole+ param of {#initialize}
+      attr_reader :ole
+
+      # See +ole_runtime+ param of {#initialize}
+      attr_reader :ole_runtime
+
+      # See +owner+ param of {#initialize}
+      attr_reader :owner
 
       # @raise ArgumentError if +ole+ or +owner+ invalid
       # @param ole [WIN32OLE] wrapped ole object
       # @param ole_runtime ole rutime which spawn +ole+ object
-      # @parm owner [GenericWrapper nil] wrapper which spawn this wrapper
+      # @param owner [GenericWrapper nil] wrapper which spawn this wrapper
       #  in {#\_wrapp_ole_result\_}
       # @api private
+      # @yield self
       def initialize(ole, ole_runtime, owner)
         @ole = ole
         @ole_runtime = ole_runtime
@@ -54,10 +104,13 @@ module AssOle
         ole_runtime.xml_type_get(ole)
       end
 
+      # True if wrapper is on the top wrappers tree
       def root_owner?
         owner.nil?
       end
 
+      # Returns wrapper who is on the top of wrappers tree
+      # @return [GenericWrapper self]
       def root_owner
         return self if root_owner?
         owner.root_owner
