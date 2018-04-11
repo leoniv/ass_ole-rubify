@@ -68,18 +68,25 @@ module AssOle
             'All included `SendToOle` must respond_to? `:ole`' if symbol == :ole
         end
 
+        # Send message to +ole+ yiels returned value to block.
+        # - Before invoke +ole+ extract real 1C values (OLE objects) fot +args+
+        # - Before {#_wrapp_ole_result_} fill object attributes (bee carefull)
+        #   from +opts+ hash
+        # - Before yiels invoke {#_wrapp_ole_result_}.
         def method_missing(symbol, *args, **opts, &block)
           SendToOle.fail_must_respond_to_ole(symbol)
-
-          result = _fill_attributes_(ole.send(symbol, *_extract_args_(args)),
-                                     **_extract_opts_(opts))
-
-          result = GenericWrapper.new(result, ole_runtime, self) if\
-            ole_runtime.spawned? result
-
-          yield result if block_given?
-
+          result = ole.send(symbol, *_extract_args_(args))
+          result = _fill_attributes_(result, _extract_opts_(opts))
+          result = _wrapp_ole_result_(result)
+          yield result
           result
+        end
+
+        # @abstract
+        # In this method passing value which returns from +ole+ invocation
+        # and you can wrap it value for goal your self
+        def _wrapp_ole_result_(ole_invocation_result)
+          ole_invocation_result
         end
       end
     end
@@ -100,6 +107,13 @@ module AssOle
         @owner = owner
         yield self if block_given?
         verify!
+      end
+
+      # (see SendToOle#_wrapp_ole_result_)
+      def _wrapp_ole_result_(ole_invocation_result)
+        return GenericWrapper.new(ole_invocation_result, ole_runtime, self) if\
+            ole_runtime.spawned? ole_invocation_result
+        ole_invocation_result
       end
 
       # @return +ole_runtime.ole_connector+ ole connector to infobase

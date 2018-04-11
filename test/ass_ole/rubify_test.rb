@@ -61,6 +61,16 @@ module AssOle::RubifyTest
       assert klass.include? AssOle::Rubify::Support::SendToOle
     end
 
+    describe '#_wrapp_ole_result_' do
+      it 'returns GenericWrapper' do
+        skip 'FIXME'
+      end
+
+      it 'returns value' do
+        skip 'FIXME'
+      end
+    end
+
     describe '#initialize' do
       it 'yelds self' do
         yielded = false
@@ -128,32 +138,31 @@ module AssOle::RubifyTest
         inst.to_string_internal.must_equal :str_internal
       end
 
-      describe 'owners tree' do
-        it '#owner' do
-          klass.new(:ole, :runtime, :owner).owner.must_equal :owner
+    describe 'owners tree' do
+      it '#owner' do
+        klass.new(:ole, :runtime, :owner).owner.must_equal :owner
+      end
+
+      describe '#root_owner?' do
+        it 'is true' do
+          klass.new(:ole, :runtime, nil).root_owner?.must_equal true
         end
 
-        describe '#root_owner?' do
-          it 'is true' do
-            klass.new(:ole, :runtime, nil).root_owner?.must_equal true
-          end
+        it 'is false' do
+          klass.new(:ole, :runtime, :owner).root_owner?.must_equal false
+        end
+      end
 
-          it 'is false' do
-            klass.new(:ole, :runtime, :owner).root_owner?.must_equal false
-          end
+      describe '#root_owner' do
+        it 'is self' do
+          inst = klass.new(:ole, :runtime, nil)
+          inst.root_owner.must_equal inst
         end
 
-        describe '#root_owner' do
-          it 'is self' do
-            inst = klass.new(:ole, :runtime, nil)
-            inst.root_owner.must_equal inst
-          end
-
-          it 'is top owner' do
-            top_owner = klass.new(:ole, :runtime, nil)
-            midle_owner = klass.new(:ole, :runtime, top_owner)
-            klass.new(:ole, :runtime, midle_owner).root_owner.must_equal top_owner
-          end
+        it 'is top owner' do
+          top_owner = klass.new(:ole, :runtime, nil)
+          midle_owner = klass.new(:ole, :runtime, top_owner)
+          klass.new(:ole, :runtime, midle_owner).root_owner.must_equal top_owner
         end
       end
     end
