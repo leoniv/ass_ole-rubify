@@ -90,6 +90,22 @@ module AssOle
       end
       private :verify!
     end
+
+    module Support
+      # Helper for detect type of +ole+
+      # FIXME: doc this
+      class DuckTyping
+        # FIXME: doc this
+        def initialize(wrapper)
+          @wrapper = wrapper
+        end
+
+        # FIXME: doc this
+        def method_missing(symbol, *_)
+          wrapper.ole_respond_to? symbol.to_s.gsub(/\?$/)
+        end
+      end
+    end
   end
 end
 
