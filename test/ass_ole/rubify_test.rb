@@ -136,7 +136,6 @@ module AssOle::RubifyTest
         xml = to_xml(newObject('array'))
         actual = AssOle::Rubify.rubify(xml, ole_runtime_get)
         actual.must_be_instance_of AssOle::Rubify::GenericWrapper
-        actual.owner.must_be_nil
         actual.to_s.must_match %r{Array|Массив}
         actual.ole_runtime.must_equal ole_runtime_get
       end
@@ -150,7 +149,6 @@ module AssOle::RubifyTest
         end.new.rubify(newObject('Array'))
         actual.must_be_instance_of AssOle::Rubify::GenericWrapper
         actual.to_s.must_match %r{Array|Массив}
-        actual.owner.must_be_nil
         actual.ole_runtime.must_equal ole_runtime_get
       end
 

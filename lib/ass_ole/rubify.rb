@@ -47,11 +47,14 @@ module AssOle
     #  +ole.nil?+
     def self.rubify(ole, ole_runtime)
       return ole if ole.nil?
-      return GenericWrapper.new(ole, ole_runtime, nil) if ole.is_a? WIN32OLE
-      return GenericWrapper.new(ole_runtime.from_string_internal(ole.to_s),
-                                ole_runtime, nil) if like_string_internal?(ole)
-      return GenericWrapper.new(from_xml(ole, ole_runtime),
-                                ole_runtime, nil) if like_xml?(ole)
+      GenericWrapper.new(ole_get(ole, ole_runtime), ole_runtime)
+    end
+
+    def self.ole_get(ole, ole_runtime)
+      return ole if ole.is_a? WIN32OLE
+      return ole_runtime.from_string_internal(ole.to_s) if\
+        like_string_internal?(ole)
+      return from_xml(ole, ole_runtime) if like_xml?(ole)
       fail ArgumentError, "Unknown ole: `#{ole}`"
     end
 

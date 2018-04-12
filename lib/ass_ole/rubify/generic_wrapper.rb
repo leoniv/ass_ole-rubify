@@ -2,10 +2,8 @@ module AssOle
   module Rubify
     # Basic wrapper for 1C ole object.
     # All OLE objects returned +ole+ automatically wraps to {GenericWrapper}
-    # in {GenericWrapper#\_wrapp_ole_result_}. Wrapper who spawns new wrapper
-    # will be {GenericWrapper#owner} for new wrapper. Accordingly wrappers
-    # builds hierarchical wrappers tree.
-    # @example Hierarchical wrappers tree
+    # in {GenericWrapper#\_wrapp_ole_result_}.
+    # @example
     #   require 'ass_ole/rubify'
     #   # It's gem ass_maintainer-info_bases
     #   require 'ass_maintainer/info_bases/tmp_info_base'
@@ -25,24 +23,10 @@ module AssOle
     #
     #     md.to_s #=> "ОбъектМетаданныхКонфигурация"
     #
-    #     md.owner #=> nil
-    #
-    #     md.root_owner? #=> true
-    #
-    #     md.root_owner #=> <AssOle::Rubify::GenericWrapper:0x2104b00c>
-    #
     #     md.Name #=> "Конфигурация"
     #
     #     catalogs = md.Catalogs #=> <AssOle::Rubify::GenericWrapper:0x203fb810>
-    #
-    #     catalogs.owner #=> <AssOle::Rubify::GenericWrapper:0x2104b00c>
-    #
-    #     catalogs.root_owner? #=> false
-    #
-    #     catalogs.root_owner #=> <AssOle::Rubify::GenericWrapper:0x2104b00c>
     #   end
-    #
-    #
     class GenericWrapper
       include Support::SendToOle
 
@@ -52,20 +36,14 @@ module AssOle
       # See +ole_runtime+ param of {#initialize}
       attr_reader :ole_runtime
 
-      # See +owner+ param of {#initialize}
-      attr_reader :owner
-
-      # @raise ArgumentError if +ole+ or +owner+ invalid
+      # @raise ArgumentError if +ole+
       # @param ole [WIN32OLE] wrapped ole object
       # @param ole_runtime ole rutime which spawn +ole+ object
-      # @param owner [GenericWrapper nil] wrapper which spawn this wrapper
-      #  in {#\_wrapp_ole_result\_}
       # @api private
       # @yield self
-      def initialize(ole, ole_runtime, owner)
+      def initialize(ole, ole_runtime)
         @ole = ole
         @ole_runtime = ole_runtime
-        @owner = owner
         yield self if block_given?
         verify!
       end
@@ -73,7 +51,7 @@ module AssOle
       # @api private
       # (see SendToOle#_wrapp_ole_result_)
       def _wrapp_ole_result_(ole_invocation_result)
-        return GenericWrapper.new(ole_invocation_result, ole_runtime, self) if\
+        return GenericWrapper.new(ole_invocation_result, ole_runtime) if\
             ole_runtime.spawned? ole_invocation_result
         ole_invocation_result
       end
@@ -104,25 +82,11 @@ module AssOle
         ole_runtime.xml_type_get(ole)
       end
 
-      # True if wrapper is on the top wrappers tree
-      def root_owner?
-        owner.nil?
-      end
-
-      # Returns wrapper who is on the top of wrappers tree
-      # @return [GenericWrapper self]
-      def root_owner
-        return self if root_owner?
-        owner.root_owner
-      end
-
       def verify!
         fail ArgumentError, "ole must be `WIN32OLE`"\
           " instance not a `#{ole.class}`" unless ole.is_a? WIN32OLE
         fail ArgumentError, 'ole must be spawned'\
           ' by ole_runtime' unless ole_runtime.spawned? ole
-        fail ArgumentError, 'owner must be a GenericWrapper or nil' unless\
-          owner.nil? || owner.is_a?(GenericWrapper)
       end
       private :verify!
     end
