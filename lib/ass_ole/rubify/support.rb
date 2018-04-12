@@ -25,6 +25,7 @@ module AssOle
             ' must respond_to? `:ole`' if symbol == :ole
         end
 
+        # FIXME: method writer ignore options and block and always returns the same value was got???
         # Send message to +ole+ yiels wrapped returned value to block.
         # - Before invoke +ole+ extract real 1C values from +args+
         #   in {#\_extract_args\_}
@@ -36,11 +37,19 @@ module AssOle
         # @return {#_wrapp_ole_result_} wrapped +ole+ invocation result
         def method_missing(symbol, *args, **opts, &block)
           SendToOle.fail_must_respond_to_ole(symbol)
+          return _writer_missing_(symbol, args[0]) if symbol.to_s =~ %r{=$}
           result = ole.send(symbol, *_extract_args_(args))
           result = _fill_attributes_(result, _extract_opts_(opts))
           result = _wrapp_ole_result_(result)
           yield result if block_given?
           result
+        end
+
+        # @api private
+        # FIXME: doc this
+        def _writer_missing_(symbol, arg)
+          ole.send(symbol, _extract_ole_(arg))
+          arg
         end
 
         # @abstract

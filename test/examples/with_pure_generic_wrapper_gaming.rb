@@ -53,7 +53,12 @@ module AssOle::RubifyTest
 
         folder3 = manager.CreateFolder(Description: 'Folder 3')
 
-        folder3.Parent = folder1.Ref
+        ref = folder3.Parent = folder1.Ref
+        ref.must_be_instance_of AssOle::Rubify::GenericWrapper
+
+        ole_ref = folder3.Parent = folder1.ole.Ref
+        ole_ref.must_be_instance_of WIN32OLE
+
         folder3.Parent.Description.must_equal 'Folder 1'
       end
     end
