@@ -3,25 +3,38 @@ require 'ass_ole/rubify/patches/ass_ole'
 module AssOle
   # @example Usage as Mixin
   #   class Worker
+  #     require 'date'
   #     like_ole_runtime ExternalRuntime
   #     include AssOle::Rubify
   #
   #     def document
-  #       rubify document_get
+  #       @document ||= document_get
+  #     end
+  #
+  #     def document_get
+  #       rubify(dOcuments).DocumentName
+  #         .select(Number: '12345', Date: Date.parse('2017.01.01').to_time)
   #     end
   #   end
   #
-  #   Worker.new.document.exist?
+  #   Worker.new.document.nil?
   # @example Usage as module method
   #   class Worker
+  #     require 'date'
   #     like_ole_runtime ExternalRuntime
   #
   #     def document
-  #       AssOle::Rubify.rubify(document_get, ole_runtime_get)
+  #       @document ||= document_get
+  #     end
+  #
+  #     def document_get
+  #       AssOle::Rubify.rubify(dOcuments).DocumentName
+  #         .select(Number: '12345', Date: Date.parse('2017.01.01').to_time)
   #     end
   #   end
   #
-  #   Worker.new.document.exist?
+  #   Worker.new.document.nil?
+  # @example (see GenericWrapper)
   module Rubify
 
     # Define server context ole runtimes

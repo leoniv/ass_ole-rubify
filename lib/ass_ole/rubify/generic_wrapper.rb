@@ -3,7 +3,7 @@ module AssOle
     # Basic wrapper for 1C ole object.
     # All OLE objects returned +ole+ automatically wraps to {GenericWrapper}
     # in {GenericWrapper#\_wrapp_ole_result_}.
-    # @example
+    # @example All 1C OLE objects automatically wraps to {GenericWrapper}
     #   require 'ass_ole/rubify'
     #   # It's gem ass_maintainer-info_bases
     #   require 'ass_maintainer/info_bases/tmp_info_base'
