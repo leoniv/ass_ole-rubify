@@ -2,6 +2,29 @@ module AssOle
   module Rubify
     # Helpers mixin
     module Support
+      # Helper for duck typing of +ole+
+      # @example
+      #   include AssOle::Rubify
+      #
+      #   arr = rubify(newObject('Array'))
+      #
+      #   # It like arr.ole_respond_to? :Get
+      #   arr.quack.Get? #=> true
+      class DuckTyping
+        attr_reader :wrapper
+
+        # @param wrapper [GenericWrapper]
+        def initialize(wrapper)
+          @wrapper = wrapper
+        end
+
+        # Invoke #ole_respond_to? symbol.to_s.gsub(/\?$/)
+        # @example (see DuckTyping)
+        def method_missing(symbol, *_)
+          wrapper.ole_respond_to? symbol.to_s.gsub(/\?$/, '').to_sym
+        end
+      end
+
       module FillAttributes
         # @api private
         # Filling +obj+ attributes from hash +attributes+. Values of

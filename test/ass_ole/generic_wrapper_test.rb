@@ -28,6 +28,12 @@ module AssOle::RubifyTest
       klass.new(valid_ole_obj, ole_runtime_get).to_s.must_match %r{Массив|Array}i
     end
 
+    it '#quack' do
+      inst = klass.new(valid_ole_obj, ole_runtime_get)
+      inst.quack.Get?.must_equal true
+      inst.quack.Fake?.must_equal false
+    end
+
     it 'include? Support::SendToOle' do
       assert klass.include? AssOle::Rubify::Support::SendToOle
     end

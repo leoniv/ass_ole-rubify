@@ -125,4 +125,15 @@ module AssOle::RubifyTest
       inst._wrapp_ole_result_('Abstract method').must_equal 'Abstract method'
     end
   end
+
+  describe AssOle::Rubify::Support::DuckTyping do
+    it 'method_missing' do
+      wrapper = mock
+      wrapper.expects(:ole_respond_to?).with(:Foo).returns(true)
+      wrapper.expects(:ole_respond_to?).with(:Bar).returns(false)
+      inst = AssOle::Rubify::Support::DuckTyping.new(wrapper)
+      inst.Foo?.must_equal true
+      inst.Bar?.must_equal false
+    end
+  end
 end

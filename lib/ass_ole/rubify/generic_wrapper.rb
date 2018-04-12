@@ -72,6 +72,12 @@ module AssOle
         ole_connector.sTring(ole).to_s
       end
 
+      # @return [Support::DuckTyping]
+      # @example (see Support::DuckTyping)
+      def quack
+        @duck_typing ||= Support::DuckTyping.new(self)
+      end
+
       # @return (see Patches::StringInternal#to_string_internal)
       def to_string_internal
         ole_runtime.to_string_internal(ole)
@@ -89,22 +95,6 @@ module AssOle
           ' by ole_runtime' unless ole_runtime.spawned? ole
       end
       private :verify!
-    end
-
-    module Support
-      # Helper for detect type of +ole+
-      # FIXME: doc this
-      class DuckTyping
-        # FIXME: doc this
-        def initialize(wrapper)
-          @wrapper = wrapper
-        end
-
-        # FIXME: doc this
-        def method_missing(symbol, *_)
-          wrapper.ole_respond_to? symbol.to_s.gsub(/\?$/)
-        end
-      end
     end
   end
 end
