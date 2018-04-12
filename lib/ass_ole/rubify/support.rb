@@ -25,14 +25,21 @@ module AssOle
             ' must respond_to? `:ole`' if symbol == :ole
         end
 
-        # FIXME: method writer ignore options and block and always returns the same value was got???
-        # Send message to +ole+ yiels wrapped returned value to block.
+        # Method missing handler.
+        #
+        # It has a two different behavior for reader and writer methods.
+        #
+        # Writers handling in {#\_writer_missing\_} and ignores an options
+        # and the block.
+        #
+        # Readers handling here and sends message to the +ole+, yields wrapped
+        # result of +ole+ invocation to the block
         # - Before invoke +ole+ extract real 1C values from +args+
         #   in {#\_extract_args\_}
         # - Before {#\_wrapp_ole_result\_} fills object attributes
-        #   in {FillAttributes#\_fill_attributes\_} from +opts+ hash which bebore
-        #   passed thow #{#\_extract_opts\_}
-        # - Before yiels invoke {#\_wrapp_ole_result\_}.
+        #   in {FillAttributes#\_fill_attributes\_} from +opts+ hash which
+        #   before passed thru the {#\_extract_opts\_}
+        # - Before yielding, value passes thru the {#\_wrapp_ole_result\_}
         # @yield {#_wrapp_ole_result_} wrapped +ole+ invocation result
         # @return {#_wrapp_ole_result_} wrapped +ole+ invocation result
         def method_missing(symbol, *args, **opts, &block)
@@ -46,7 +53,10 @@ module AssOle
         end
 
         # @api private
-        # FIXME: doc this
+        # Handler for missing writer methods, send message to +ole+ and always
+        # returns the same value was got in +arg+ parameter
+        # @param symbol [Symbol] method name
+        # @return +arg+ value
         def _writer_missing_(symbol, arg)
           ole.send(symbol, _extract_ole_(arg))
           arg
