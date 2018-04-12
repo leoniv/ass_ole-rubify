@@ -50,6 +50,9 @@ module AssOle
       GenericWrapper.new(ole_get(ole, ole_runtime), ole_runtime)
     end
 
+    # @param (see .rubify)
+    # @return [WIN32OLE]
+    # @raise [ArgumentError] if unknown +ole+ type got
     def self.ole_get(ole, ole_runtime)
       return ole if ole.is_a? WIN32OLE
       return ole_runtime.from_string_internal(ole.to_s) if\
