@@ -86,8 +86,8 @@ end
 
 ```
 
-`AssOle::Rubify` provides wrappers for does the same action above in the Ruby
-style
+`AssOle::Rubify` provides wrapper and its mixins for does the same action
+above in the Ruby style
 
 ```ruby
 require 'ass_ole-rubify'
@@ -113,6 +113,7 @@ cat_item = Worker.Catalogs.CatalogName
       row.Attr2 = "Attr2 val #{i}"
     end
   end
+# Not `Write`! Invoke `write` method defined in GenericWrapper::Mixins::Write
 end.write #=> AssOle::Rubify::GenericWrapper
 
 # Workin with 1C Array
