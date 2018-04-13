@@ -28,13 +28,15 @@ module AssOle
   #     end
   #
   #     def document_get
-  #       AssOle::Rubify.rubify(dOcuments).DocumentName
+  #       AssOle::Rubify.rubify(dOcuments, ole_runtime_get).DocumentName
   #         .select(Number: '12345', Date: Date.parse('2017.01.01').to_time)
   #     end
   #   end
   #
   #   Worker.new.document.nil?
   # @example (see GenericWrapper)
+  # @example (see Dsl#like_rubify_runtime)
+  # @example (see GlobContex)
   module Rubify
 
     # Define server context ole runtimes
@@ -50,7 +52,9 @@ module AssOle
 
     include Support::GlobContex
 
-    # FIXME: doc this
+    # Builds {GlobContex} instance
+    # @param ole_runtime (see .rubify)
+    # @return [GlobContex] instance
     def self.glob_context(ole_runtime)
       GlobContex.new(ole_runtime)
     end

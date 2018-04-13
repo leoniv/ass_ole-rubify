@@ -115,8 +115,10 @@ module AssOle
         end
       end
 
+      # Mixin for {#glob_context} method
       module GlobContex
-        # FIXME: doc this
+        # @return [GlobContex] instance
+        # @example (see GlobContex)
         def glob_context
           @glob_context ||= AssOle::Rubify.glob_context(ole_runtime_get)
         end

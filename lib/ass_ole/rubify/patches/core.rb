@@ -14,7 +14,25 @@ module AssOle
         end
       end
 
-      # FIXME: doc this
+      # Define class or module which transparecy invoke {GlobContex} as self
+      # @example Transparency invoke {GlobContex} and wrapping all OLE to {GenericWrapper}
+      #   info_base = AssMaintainer::InfoBase.new('', 'File="path"')
+      #
+      #   module Runtimes
+      #     module External
+      #       is_ole_runtime :external
+      #       run infobase
+      #     end
+      #   end
+      #
+      #   module MyOleAccessor
+      #     like_rubify_runtime Runtimes::External
+      #   end
+      #
+      #   md.glob_context #=> AssOle::Rubify::GlobContex
+      #   md = MyOleAccessor.Methadata #=> AssOle::Rubify::GenericWrapper
+      #   md.Documents #=> AssOle::Rubify::GenericWrapper
+      #   #... etc
       def like_rubify_runtime(runtime)
         like_ole_runtime runtime
         case self
