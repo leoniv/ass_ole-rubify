@@ -110,7 +110,7 @@ cat_item = Worker.Catalogs.CatalogName
 
   3.times do |i|
     cat_item.TabularSection1.Add Attr1: "Attr1 val #{i}" do |row|
-      row.Attr2 = "Attr2 val
+      row.Attr2 = "Attr2 val #{i}"
     end
   end
 end.Write #=> AssOle::Rubify::GenericWrapper
