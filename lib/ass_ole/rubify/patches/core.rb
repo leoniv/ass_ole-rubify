@@ -2,12 +2,14 @@
 module AssOle
   module Rubify
     module Dsl
+      # @api private
       module Support
         module SendToGlobContext
           include Rubify::Support::GlobContex
 
           def method_missing(symbol, *args, **opts, &block)
-            glob_context.send(symbol, *args, **opts, &block)
+            AssOle::Snippets.fail_if_bad_context(self)
+            glob_context.send(symbol, *args, **opts, &block) if ole_connector
           end
         end
       end
