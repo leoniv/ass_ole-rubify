@@ -42,6 +42,13 @@ module AssOle::RubifyTest
         AssOle::Rubify.rubify(nil, ole_runtime_get).must_be_nil
       end
 
+      it 'when ole is a GenericWrapper returns ole' do
+        stub = Class.new(AssOle::Rubify::GenericWrapper) do
+          def initialize; end
+        end.new
+        AssOle::Rubify.rubify(stub, nil).must_equal stub
+      end
+
       it 'fail ArgumentError when ole is ivalid' do
         e = proc {
           AssOle::Rubify.rubify(:invalid, nil)
@@ -76,6 +83,22 @@ module AssOle::RubifyTest
           include AssOle::Rubify
         end.new.rubify(:ole).must_equal :wrapper
       end
+    end
+
+    it '#glob_context' do
+      AssOle::Rubify.expects(:glob_context).with(ole_runtime_get)
+        .returns(:GlobContex)
+      inst = Class.new do
+        like_ole_runtime Runtimes::Ext
+        include AssOle::Rubify
+      end.new
+      inst.glob_context.must_equal :GlobContex
+      inst.glob_context.must_equal :GlobContex, 'instace of GlobContex stored'
+    end
+
+    it '.glob_context' do
+      actual = AssOle::Rubify.glob_context(ole_runtime_get)
+      actual.must_be_instance_of AssOle::Rubify::GlobContex
     end
 
     it '.like_string_internal?' do

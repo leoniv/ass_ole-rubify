@@ -29,12 +29,14 @@ module AssOle
     #   end
     class GenericWrapper
       include Support::SendToOle
+      include Support::GlobContex
 
       # See +ole+ param of {#initialize}
       attr_reader :ole
 
       # See +ole_runtime+ param of {#initialize}
       attr_reader :ole_runtime
+      alias_method :ole_runtime_get, :ole_runtime
 
       # @raise ArgumentError if +ole+
       # @param ole [WIN32OLE] wrapped ole object

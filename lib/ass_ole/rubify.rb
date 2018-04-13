@@ -1,5 +1,5 @@
 require 'ass_ole'
-require 'ass_ole/rubify/patches/ass_ole'
+
 module AssOle
   # @example Usage as Mixin
   #   class Worker
@@ -40,26 +40,39 @@ module AssOle
     # Define server context ole runtimes
     SRV_RUNTIMES = [:thick, :external]
 
+    require 'ass_ole/rubify/patches/ass_ole'
     require 'ass_ole/rubify/version'
     require 'ass_ole/rubify/support'
     require 'ass_ole/rubify/generic_wrapper'
+    require 'ass_ole/rubify/glob_context'
+    require 'ass_ole/rubify/patches/core'
     require 'ass_ole/rubify/md_managers'
 
-    # @param ole [WIN32OLE String] if passed +String+ expects xml or
-    #  +StringInternal+
+    include Support::GlobContex
+
+    # FIXME: doc this
+    def self.glob_context(ole_runtime)
+      GlobContex.new(ole_runtime)
+    end
+
+    # @param ole [WIN32OLE GenericWrapper String] if passed +String+ expects
+    # xml or +StringInternal+. If passed instance of {GenericWrapper} returs
+    # same +ole+ value
     # @return [GenericWrapper nil] wrapper for 1C +ole+ object or +nil+ if
     #  +ole.nil?+
     def rubify(ole)
       AssOle::Rubify.rubify(ole, ole_runtime_get)
     end
 
-    # @param ole [WIN32OLE String] if passed +String+ expects xml or
-    #  +StringInternal+
+    # @param ole [WIN32OLE GenericWrapper String] if passed +String+ expects
+    # xml or +StringInternal+. If passed instance of {GenericWrapper} returs
+    # same +ole+ value
     # @param ole_runtime (see GenericWrapper#initialize)
     # @return [GenericWrapper nil] wrapper for 1C +ole+ object or +nil+ if
     #  +ole.nil?+
     def self.rubify(ole, ole_runtime)
       return ole if ole.nil?
+      return ole if ole.is_a? GenericWrapper
       GenericWrapper.new(ole_get(ole, ole_runtime), ole_runtime)
     end
 

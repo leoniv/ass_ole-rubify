@@ -34,6 +34,11 @@ module AssOle::RubifyTest
       inst.quack.Fake?.must_equal false
     end
 
+    it '#glob_context' do
+      klass.new(valid_ole_obj, ole_runtime_get).glob_context
+        .must_be_instance_of AssOle::Rubify::GlobContex
+    end
+
     it 'include? Support::SendToOle' do
       assert klass.include? AssOle::Rubify::Support::SendToOle
     end

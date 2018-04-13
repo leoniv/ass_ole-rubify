@@ -114,6 +114,13 @@ module AssOle
           args.map {|a| _extract_ole_ a}
         end
       end
+
+      module GlobContex
+        # FIXME: doc this
+        def glob_context
+          @glob_context ||= AssOle::Rubify.glob_context(ole_runtime_get)
+        end
+      end
     end
   end
 end
