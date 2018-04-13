@@ -109,7 +109,7 @@ cat_item = Worker.Catalogs.CatalogName
   .CreateItem(Description: 'Item name', Attr1: 'Attr1 value') do |item|
 
   3.times do |i|
-    cat_item.TabularSection1.Add Attr1: "Attr1 val #{i}" do |row|
+    item.TabularSection1.Add Attr1: "Attr1 val #{i}" do |row|
       row.Attr2 = "Attr2 val #{i}"
     end
   end
