@@ -61,7 +61,7 @@ end
 cat_item.Write #=> nil
 
 # Workin with 1C Array
-ole_arr = newObject('Array') #=> WIN32OLE
+ole_arr = Worker.newObject('Array') #=> WIN32OLE
 
 3.times do |i|
   ole_arr.Add(i)
@@ -116,7 +116,7 @@ cat_item = Worker.Catalogs.CatalogName
 end.Write #=> AssOle::Rubify::GenericWrapper
 
 # Workin with 1C Array
-arr = newObject('Array') do |a|
+arr = Worker.newObject('Array') do |a|
   3.times do |i|
     a.Add(i)
   end
