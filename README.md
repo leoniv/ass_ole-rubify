@@ -27,6 +27,115 @@ FIXME:
 >  etc. Wrappers for `md_manger` dynamicaly generated in
 >  `AssOle::Rubify::MdManagers` namespace for specific 1C application instance.
 
+## Main profit from Rubify
+
+Standatrt scripting ower 1C with [ass_ole runtime](https://github.com/leoniv/ass_ole)
+
+```ruby
+require 'ass_ole'
+require 'ass_maintainer-info_base'
+
+INFO_BASE = AssMaintainer::InfoBase.new('', 'File="path"')
+
+module ExtRuntime
+  is_ole_runtime :external
+  run INFO_BASE
+end
+
+module Worker
+  like_ole_runtime ExtRuntime
+end
+
+
+# Working with Catalogs
+cat_item = Worker.Catalogs.CatalogName.CreateItem #=> WIN32OLE
+cat_item.Description = 'Item name'
+cat_item.Attr1 = 'Attr 1 value'
+
+3.times do |i|
+  row = cat_item.TabularSection1.Add
+  row.Attr1 = "Attr1 val #{i}"
+  row.Attr2 = "Attr2 val #{i}"
+end
+
+cat_item.Write #=> nil
+
+# Workin with 1C Array
+ole_arr = newObject('Array') #=> WIN32OLE
+
+3.times do |i|
+  ole_arr.Add(i)
+end
+
+# Maping arr
+new_arr = []
+
+ole_arr.Count.times do |index|
+  new_arr << arr.Get(index) ** 2
+end
+
+# Select from Array
+new_arr = []
+
+ole_arr.Count.times do |index|
+  val = ole_arr.Get(index)
+  new_arr << val if val > 1
+end
+
+# ... etc
+
+```
+
+`AssOle::Rubify` provides wrappers for does the same action above in the Ruby
+style
+
+```ruby
+require 'ass_ole-rubify'
+require 'ass_maintainer-info_base'
+
+INFO_BASE = AssMaintainer::InfoBase.new('', 'File="path"')
+
+module ExtRuntime
+  is_ole_runtime :external
+  run INFO_BASE
+end
+
+module Worker
+  like_rubify_runtime ExtRuntime
+end
+
+# Working with Catalogs
+cat_item = Worker.Catalogs.CatalogName
+  .CreateItem(Description: 'Item name', Attr1: 'Attr1 value') do |item|
+
+  3.times do |i|
+    cat_item.TabularSection1.Add Attr1: "Attr1 val #{i}" do |row|
+      row.Attr2 = "Attr2 val
+    end
+  end
+end.Write #=> AssOle::Rubify::GenericWrapper
+
+# Workin with 1C Array
+arr = newObject('Array') do |a|
+  3.times do |i|
+    a.Add(i)
+  end
+end #=> AssOle::Rubify::GenericWrapper
+
+# Maping arr
+arr.map do |item|
+  item ** 2
+end #=> Array
+
+# Select from arr
+arr.select do |item|
+  item > 1
+end #=> Array
+
+# ...etc
+```
+
+
 ## Installation
 
 Add this line to your application's Gemfile:
