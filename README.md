@@ -113,7 +113,7 @@ cat_item = Worker.Catalogs.CatalogName
       row.Attr2 = "Attr2 val #{i}"
     end
   end
-end.Write #=> AssOle::Rubify::GenericWrapper
+end.write #=> AssOle::Rubify::GenericWrapper
 
 # Workin with 1C Array
 arr = Worker.newObject('Array') do |a|
