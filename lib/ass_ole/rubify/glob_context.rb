@@ -27,6 +27,12 @@ module AssOle
         super ole_runtime.ole_connector, ole_runtime
       end
 
+      # (see Mixins)
+      # @api private
+      def mixins_blend
+        Mixins.blend(self)
+      end
+
       def verify!; end
     end
   end

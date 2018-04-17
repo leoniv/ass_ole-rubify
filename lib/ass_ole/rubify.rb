@@ -48,6 +48,7 @@ module AssOle
     require 'ass_ole/rubify/generic_wrapper'
     require 'ass_ole/rubify/generic_wrapper/mixins'
     require 'ass_ole/rubify/glob_context'
+    require 'ass_ole/rubify/glob_context/mixins'
     require 'ass_ole/rubify/patches/core'
     require 'ass_ole/rubify/md_managers'
 
