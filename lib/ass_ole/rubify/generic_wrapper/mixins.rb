@@ -1,7 +1,7 @@
 module AssOle
   module Rubify
     class GenericWrapper
-      # Dynamicaly mixins for {GenericWrapper} instances
+      # Dynamically blended mixins for {GenericWrapper} instances
       # All modules included in {Mixins} name space
       # must implements {Support::MixinInterface#blend?} which
       # returns +true+ if wrapper must be extended by this

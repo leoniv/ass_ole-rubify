@@ -43,6 +43,12 @@ module AssOle::RubifyTest
       assert klass.include? AssOle::Rubify::Support::SendToOle
     end
 
+    it '#real_win_path' do
+      inst = klass.new(valid_ole_obj, ole_runtime_get)
+      inst.must_respond_to :real_win_path
+      inst.real_win_path(__FILE__).must_match %r{ass_ole\\glob_context_test}
+    end
+
     describe '#_wrapp_ole_result_' do
       it 'returns GenericWrapper' do
         inst = klass.new(valid_ole_obj, ole_runtime_get)

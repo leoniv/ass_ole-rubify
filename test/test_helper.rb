@@ -31,6 +31,12 @@ module AssOle::RubifyTest
       run Env::IB
       ole_connector.Visible = false
     end
+
+    module Thick
+      is_ole_runtime :thick
+      run Env::IB
+      ole_connector.Visible = false
+    end
   end
 end
 
