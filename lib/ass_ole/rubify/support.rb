@@ -125,7 +125,7 @@ module AssOle
       end
 
       # @abstract
-      # Abstract interface for {GenericWrapper} mixin module
+      # Abstract interface for mixin module
       # @example (see #blend?)
       module MixinInterface
         # Returns +true+ if +wrapper+ must be extended by this mixin
