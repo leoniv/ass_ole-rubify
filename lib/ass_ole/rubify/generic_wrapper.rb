@@ -46,9 +46,15 @@ module AssOle
       def initialize(ole, ole_runtime)
         @ole = ole
         @ole_runtime = ole_runtime
-        Mixins.bland(self)
+        mixins_blend
         yield self if block_given?
         verify!
+      end
+
+      # @api private
+      # (see Mixins)
+      def mixins_blend
+        Mixins.blend(self)
       end
 
       # @api private

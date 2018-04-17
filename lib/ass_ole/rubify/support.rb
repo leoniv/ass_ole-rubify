@@ -123,6 +123,42 @@ module AssOle
           @glob_context ||= AssOle::Rubify.glob_context(ole_runtime_get)
         end
       end
+
+      # @abstract
+      # Abstract interface for {GenericWrapper} mixin module
+      # @example (see #blend?)
+      module MixinInterface
+        # Returns +true+ if +wrapper+ must be extended by this mixin
+        # @param wrapper [GenericWrapper]
+        # @example Writes mixin example
+        #   module AssOle::Rubify::GenericWrapper::Mixins
+        #     module Write
+        #       def self.blend?(wrapper)
+        #         wrapper.quack.Write?
+        #       end
+        #
+        #       def write(*args, **options, &block)
+        #         #....
+        #       end
+        #     end
+        #   end
+        def blend?(wrapper)
+          fail 'Abstract method call'
+        end
+      end
+
+      # TODO: doc this with example
+      module MixinsContainer
+        # @api private
+        def blend(wr)
+          constants.each do |c|
+            mixin = const_get(c)
+            mixin.blend(wr) if mixin.respond_to? :blend
+            wr.send(:extend, mixin) if\
+              mixin.respond_to?(:blend?) && mixin.blend?(wr)
+          end
+        end
+      end
     end
   end
 end
