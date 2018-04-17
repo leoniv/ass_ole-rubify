@@ -8,7 +8,6 @@ module AssOle
       # mixin
       # @example (see Support::MixinInterface)
       module Mixins
-        require 'ass_ole/snippets/shared'
         extend Support::MixinsContainer
 
         def self._?(wr)
@@ -22,19 +21,28 @@ module AssOle
           end
 
           # FIXME doc this
-          include AssOle::Snippets::Shared::Array
-          alias_method :Array, :array
+          def Array(*args)
+            fail 'FIXME'
+          end
+          alias_method :array, :Array
+
           # FIXME doc this
-          include AssOle::Snippets::Shared::Structure
-          alias_method :Structure, :structure
+          def Structure(**opts)
+            fail 'FIXME'
+          end
+          alias_method :structure, :Structure
+
           # FIXME doc this
-          include AssOle::Snippets::Shared::Map
-          alias_method :Map, :map
+          def Map(**opts)
+            fail 'FIXME'
+          end
+          alias_method :map, :Map
 
           # FIXME doc this
           def Type(type_name)
             newObject('TypeDescription', type_name).Types.Get(0)
           end
+          alias_method :type, :Type
         end
 
         # FIXME doc this
@@ -44,12 +52,16 @@ module AssOle
           end
 
           # FIXME doc this
-          include AssOle::Snippets::Shared::ValueTable
-          alias_method :ValueTable, :value_table
+          def ValueTable(**columns)
+            fail 'FIXME'
+          end
+          alias_method :value_table, :ValueTable
+
           # FIXME doc this
-          include AssOle::Snippets::Shared::Query
-          alias_method :Query, :query
-          alias_method :TempTablesManager, :temp_tables_manager
+          def Query(text, temp_tables_manager, **param)
+            fail 'FIXME'
+          end
+          alias_method :query, :Query
         end
 
         # FIXME doc this

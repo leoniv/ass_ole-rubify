@@ -196,13 +196,26 @@ module AssOle::RubifyTest
       end
 
       it '#Query' do
-        actual = glob_context.Query('select 2')
+        actual = glob_context.Query('select &p1 as p1, &p2 as p2, &p3 as p3', p1: 1, p2: 2, p3: 3)
         actual.must_be_instance_of AssOle::Rubify::GenericWrapper
         actual.to_s.must_match %r{Query|Запрос}
+        actual.TempTableManager.to_s.must_match %{TempTableManager|МенеджерВременныхТаблиц}
+        value_table = actual.Execute.Upload
+        value_table.Count.must_equal 1
+        value_table.Get(0).p1.must_equal 1
+        value_table.Get(0).p2.must_equal 2
+        value_table.Get(0).p3.must_equal 3
       end
 
       it '#ValueTabale' do
-        actual = glob_context.ValueTable(:col1, :col2, :col3)
+        actual = glob_context.ValueTable(:col1, :col2, :col3) do |vt|
+          vt.must_be_instance_of AssOle::Rubify::GenericWrapper
+          3.times do |i|
+            vt.Add(col1: "v1 #{i}", col2: "v2 #{i}") do |row|
+              row.must_be_instance_of AssOle::Rubify::GenericWrapper
+            end
+          end
+        end
         actual.must_be_instance_of AssOle::Rubify::GenericWrapper
         actual.to_s.must_match %r{ValueTable|ТаблицаЗначений}
       end
