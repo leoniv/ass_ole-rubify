@@ -113,6 +113,17 @@ module AssOle
               Get(index)
             end
             alias_method :[], :get
+
+            # FIXME
+            module Set
+              def self.blend?(wr)
+                Indexable.blend?(wr) && wr.quack.Set?
+              end
+
+              def []=(index, value)
+                Set(index, value)
+              end
+            end
           end
         end
       end

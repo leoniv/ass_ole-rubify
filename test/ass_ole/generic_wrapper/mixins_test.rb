@@ -24,43 +24,7 @@ module AssOle::RubifyTest
           end
         end
 
-        describe 'ValueTable' do
-          include AssOle::Snippets::Shared::ValueTable
-          include MustIncludeIndexable
-
-          def value_table_collection(size)
-            value_table :c1, :c2, :c3 do |vt|
-              size.times do |i|
-                vt.add c1: "c1 #{i}", c2: "c2 #{i}", c3: "c3 #{i}"
-              end
-            end
-          end
-
-          def ole_coll(size)
-            @ole_coll ||= value_table_collection(size)
-          end
-
-          describe '#each' do
-            it 'without block' do
-              collection_wrapper.each.must_be_instance_of AssOle::Rubify::GenericWrapper
-            end
-
-            it 'with block' do
-              times = 0
-
-              collection_wrapper.each_with_index do |row, row_index|
-                [:c1, :c2, :c3].each do |column|
-                  row.send(column).must_equal "#{column} #{row_index}"
-                  times += 1
-                end
-              end.must_equal collection_wrapper
-
-              times.must_equal 5 * 3
-            end
-          end
-        end
-
-        describe 'Array' do
+        describe 'In detail tests with Array' do
           include AssOle::Snippets::Shared::Array
           include MustIncludeIndexable
 
@@ -152,8 +116,105 @@ module AssOle::RubifyTest
             end
           end
         end
+
+        describe 'Reduced tests whith ValueTable' do
+          include AssOle::Snippets::Shared::ValueTable
+          include MustIncludeIndexable
+
+          def value_table_collection(size)
+            value_table :c1, :c2, :c3 do |vt|
+              size.times do |i|
+                vt.add c1: "c1 #{i}", c2: "c2 #{i}", c3: "c3 #{i}"
+              end
+            end
+          end
+
+          def ole_coll(size)
+            @ole_coll ||= value_table_collection(size)
+          end
+
+          describe '#each' do
+            it 'without block' do
+              collection_wrapper.each.must_be_instance_of AssOle::Rubify::GenericWrapper
+            end
+
+            it 'with block' do
+              times = 0
+
+              collection_wrapper.each_with_index do |row, row_index|
+                [:c1, :c2, :c3].each do |column|
+                  row.send(column).must_equal "#{column} #{row_index}"
+                  times += 1
+                end
+              end.must_equal collection_wrapper
+
+              times.must_equal 5 * 3
+            end
+          end
+
+          describe '#[index] when' do
+            it 'collection is empty returns nil' do
+              collection_wrapper(0).size.must_equal 0
+              collection_wrapper[-1].must_be_nil
+              collection_wrapper[0].must_be_nil
+              collection_wrapper[1].must_be_nil
+            end
+
+            it 'index out of the range returns nil' do
+              collection_wrapper.size.must_equal 5
+              collection_wrapper[5].must_be_nil
+              collection_wrapper[6].must_be_nil
+            end
+
+            it 'index in of the range returns item value' do
+              collection_wrapper.size.must_equal 5
+              collection_wrapper[0].c1.must_equal "c1 0"
+              collection_wrapper[3].c1.must_equal "c1 3"
+              collection_wrapper[4].c1.must_equal "c1 4"
+            end
+
+            describe 'index < 0 will be reverse indexing' do
+              it 'index in of the rage returns item value' do
+                collection_wrapper.size.must_equal 5
+                collection_wrapper[-1].c1.must_equal "c1 4"
+                collection_wrapper[-2].c1.must_equal "c1 3"
+                collection_wrapper[-3].c1.must_equal "c1 2"
+                collection_wrapper[-4].c1.must_equal "c1 1"
+                collection_wrapper[-5].c1.must_equal "c1 0"
+              end
+
+              it 'index out of range returns nil' do
+                collection_wrapper.size.must_equal 5
+                collection_wrapper[-6].must_be_nil
+              end
+            end
+          end
+        end
+
+        describe 'Set' do
+          include AssOle::Snippets::Shared::Array
+
+          def ole_coll(_)
+            array 1, 2, 3, 4
+          end
+
+          describe '#[index]=value when' do
+            it 'index in the range' do
+              collection_wrapper[3].must_equal 4
+              (collection_wrapper[3] = 42).must_equal 42
+              collection_wrapper[3].must_equal 42
+            end
+
+            it 'index out of the range' do
+              collection_wrapper[10].must_be_nil
+              e = proc {
+                collection_wrapper[10] = 42
+              }.must_raise WIN32OLERuntimeError
+              e.message.must_match %r{выходит за границы диапазона}i
+            end
+          end
+        end
       end
     end
   end
-
 end
