@@ -137,102 +137,132 @@ module AssOle::RubifyTest
     like_ole_runtime Runtimes::Ext
 
     describe 'Collection' do
-      def inst(*args, **opts, &block)
-        @inst ||= AssOle::Rubify::GenericWrapper
-          .new(ole_coll(*args, **opts, &block), ole_runtime_get)
+      def coll_wrapper(size = 5)
+        @coll_wrapper ||= AssOle::Rubify::GenericWrapper
+          .new(ole_coll(size), ole_runtime_get)
       end
 
-      def ole_coll(*args, **opts, &block)
+      def ole_coll(size)
         fail 'Abstract method. Must return pure WIN32OLE collection'
       end
 
-      describe 'OLE Array' do
-        include AssOle::Snippets::Shared::Array
+      describe 'Indexable' do
+        module MustIncludeIndexable
+          extend Minitest::Spec::DSL
 
-        def ole_coll(items = [1, 2, 3, 4, 5])
-          @ole_coll ||= array items
+          it 'must include Indexable' do
+            coll_wrapper.singleton_class
+              .include? AssOle::Rubify::GenericWrapper::Mixins::Collection::Indexable
+          end
         end
 
-        it 'must include Indexable' do
-          inst.singleton_class
-            .include? AssOle::Rubify::GenericWrapper::Mixins::Collection::Indexable
-        end
+        describe 'ValueTable' do
+          include AssOle::Snippets::Shared::ValueTable
+          include MustIncludeIndexable
 
-        describe '#each' do
-          it 'without block' do
-            inst.each.must_be_instance_of AssOle::Rubify::GenericWrapper
+          def value_table_collection(size)
+            value_table :c1, :c2, :c3 do |vt|
+              size.times do |i|
+                vt.add с1: "c1 #{i}", c2: "c2 #{i}", c3: "c3 #{i}"
+              end
+            end
           end
 
-          it 'with block' do
+          def ole_coll(size)
+            @ole_coll ||= value_table_collection(size)
+          end
+
+        end
+
+        describe 'Array' do
+          include AssOle::Snippets::Shared::Array
+          include MustIncludeIndexable
+
+          def array_collection(size)
+            return array if size <= 0
+            array(*(1 .. size).to_a)
+          end
+
+          def ole_coll(size)
+            @ole_coll ||= array_collection(size)
+          end
+
+          describe '#each' do
+            it 'without block' do
+              coll_wrapper.each.must_be_instance_of AssOle::Rubify::GenericWrapper
+            end
+
+            it 'with block' do
+              times = 0
+
+              coll_wrapper.each do |item|
+                times += 1
+                item.must_equal times
+              end.must_equal coll_wrapper
+
+              times.must_equal 5
+            end
+          end
+
+          it '#each_with_index' do
             times = 0
 
-            inst.each do |item|
+            coll_wrapper.each_with_index do |item, index|
               times += 1
               item.must_equal times
-            end.must_equal inst
+              index.must_equal item - 1
+            end
 
             times.must_equal 5
           end
-        end
 
-        it '#each_with_index' do
-          times = 0
-
-          inst.each_with_index do |item, index|
-            times += 1
-            item.must_equal times
-            index.must_equal item - 1
+          it '#map' do
+            coll_wrapper.map(&:to_s).must_equal %w{1 2 3 4 5}
           end
 
-          times.must_equal 5
-        end
-
-        it '#map' do
-          inst.map(&:to_s).must_equal %w{1 2 3 4 5}
-        end
-
-        it '#size' do
-          inst.size.must_equal 5
-        end
-
-        it '#count' do
-          inst.count.must_equal 5
-        end
-
-        describe '#[index] when' do
-          it 'array is empty returns nil' do
-            inst([]).size.must_equal 0
-            inst[-1].must_be_nil
-            inst[0].must_be_nil
-            inst[1].must_be_nil
+          it '#size' do
+            coll_wrapper.size.must_equal 5
           end
 
-          it 'index out of the range returns nil' do
-            inst.size.must_equal 5
-            inst[5].must_be_nil
-            inst[6].must_be_nil
+          it '#count' do
+            coll_wrapper.count.must_equal 5
           end
 
-          it 'index in of the range returns item value' do
-            inst.size.must_equal 5
-            inst[0].must_equal 1
-            inst[3].must_equal 4
-            inst[4].must_equal 5
-          end
-
-          describe 'index < 0 will be reverse indexing' do
-            it 'index in of the rage returns item value' do
-              inst.size.must_equal 5
-              inst[-1].must_equal 5
-              inst[-2].must_equal 4
-              inst[-3].must_equal 3
-              inst[-4].must_equal 2
-              inst[-5].must_equal 1
+          describe '#[index] when' do
+            it 'collection is empty returns nil' do
+              coll_wrapper(0).size.must_equal 0
+              coll_wrapper[-1].must_be_nil
+              coll_wrapper[0].must_be_nil
+              coll_wrapper[1].must_be_nil
             end
 
-            it 'index out of range returns nil' do
-              inst.size.must_equal 5
-              inst[-6].must_be_nil
+            it 'index out of the range returns nil' do
+              coll_wrapper.size.must_equal 5
+              coll_wrapper[5].must_be_nil
+              coll_wrapper[6].must_be_nil
+            end
+
+            it 'index in of the range returns item value' do
+              coll_wrapper.size.must_equal 5
+              coll_wrapper[0].must_equal 1
+              coll_wrapper[3].must_equal 4
+              coll_wrapper[4].must_equal 5
+            end
+
+            describe 'index < 0 will be reverse indexing' do
+              it 'index in of the rage returns item value' do
+                coll_wrapper.size.must_equal 5
+                coll_wrapper[-1].must_equal 5
+                coll_wrapper[-2].must_equal 4
+                coll_wrapper[-3].must_equal 3
+                coll_wrapper[-4].must_equal 2
+                coll_wrapper[-5].must_equal 1
+              end
+
+              it 'index out of range returns nil' do
+                coll_wrapper.size.must_equal 5
+                coll_wrapper[-6].must_be_nil
+              end
             end
           end
         end
