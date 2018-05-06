@@ -14,58 +14,69 @@ module AssOle
           wr.quack.NewObject?
         end
 
-        # FIXME doc this
+        # Mixins for all ole runtimes thick/thin clients
+        # and external connection ole runtimes
         module MixedContext
+          #@api private
           def self.blend?(wr)
             Mixins._?(wr)
           end
 
-          # FIXME doc this
-          def Array(*args)
-            fail 'FIXME'
-          end
-          alias_method :array, :Array
-
-          # FIXME doc this
-          def Structure(**opts)
-            fail 'FIXME'
-          end
-          alias_method :structure, :Structure
-
-          # FIXME doc this
-          def Map(**opts)
-            fail 'FIXME'
-          end
-          alias_method :map, :Map
-
-          # FIXME doc this
-          def Type(type_name)
+          # Bilds 1C Type instance by type name
+          # @param type_name [String] type_name like 'String',
+          #  'CatalogRef.CatName' etc
+          # @return [GenericWrapper]
+          # @example
+          #   t = type_get 'CatalogRef.Catalog1' # => GenericWrapper
+          def type_get(type_name)
             newObject('TypeDescription', type_name).Types.Get(0)
           end
-          alias_method :type, :Type
         end
 
-        # FIXME doc this
+        # Mixins for thick client and external connection
+        # runtimes
         module ServerContext
+          #@api private
           def self.blend?(wr)
             Mixins._?(wr) && wr.quack.Metadata?
           end
 
-          # FIXME doc this
-          def ValueTable(**columns)
-            fail 'FIXME'
-          end
-          alias_method :value_table, :ValueTable
+          # Build 1C Query instance with param and TempTablesManager
+          # @example
+          #
+          #   # Get query object
+          #   query = query_get('select &p1, &p2', p1: 1, p2: 2)
+          #   value_table = query.Execute.Unload
+          #
+          #   # Execute query without hold of query object
+          #   vtable = query_get('select &p1, &p2', p1: 1, p2: 2) do |q|
+          #     q.Execute.Unload
+          #   end
+          #
+          # @param text [String] query text
+          # @param tempt_manager [GenericWrapper] 1C TempTablesManager
+          # @param params [Hash] qury parameters
+          # @return [GenericWrapper] 1C Query instance unless &block
+          #   given
+          # @return &block result if block given
+          # @yield [GenericWrapper] 1C Query instance
+          def query_get(text, tempt_manager = nil, **params, &block)
+            result = newObject('Query', text) do |q|
+              q.TempTablesManager = tempt_manager ||\
+                newObject('TempTablesManager')
 
-          # FIXME doc this
-          def Query(text, temp_tables_manager, **param)
-            fail 'FIXME'
+              params.each do |k, v|
+                q.SetParameter(k.to_s, v)
+              end
+            end
+            result = yield result if block_given?
+            result
           end
-          alias_method :query, :Query
         end
 
-        # FIXME doc this
+        # Mixins for exactly thin client ole runtime
         module ClientContext
+          #@api private
           def self.blend?(wr)
             Mixins._?(wr) && wr.quack.GetForm?
           end

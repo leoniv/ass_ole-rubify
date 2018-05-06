@@ -151,25 +151,8 @@ module AssOle::RubifyTest
           .must_equal true
       end
 
-      it '#Array' do
-        glob_context.Array(1,2,3,4).must_be_instance_of AssOle::Rubify::GenericWrapper
-        glob_context.Array(1,2,3,4).to_s.must_match %r{Array|Массив}
-      end
-
-      it '#Map' do
-        actual = glob_context.Map(:'key 1' => 1, :'key 2' => 2)
-        actual.must_be_instance_of AssOle::Rubify::GenericWrapper
-        actual.to_s.must_match %r{Map|Соответствие}
-      end
-
-      it '#Structure' do
-        actual = glob_context.Structure(:key1 => 1, :key2 => 2)
-        actual.must_be_instance_of AssOle::Rubify::GenericWrapper
-        actual.to_s.must_match %r{Structure|Структура}
-      end
-
-      it '#Type' do
-        actual = glob_context.Type('CatalogRef.Catalog1')
+      it '#type_get' do
+        actual = glob_context.type_get('CatalogRef.Catalog1')
         actual.must_be_instance_of AssOle::Rubify::GenericWrapper
         actual.to_s.must_match %r{Catalog1}
         actual.xml_type.must_equal 'Type'
@@ -195,29 +178,25 @@ module AssOle::RubifyTest
           .must_equal true
       end
 
-      it '#Query' do
-        actual = glob_context.Query('select &p1 as p1, &p2 as p2, &p3 as p3', p1: 1, p2: 2, p3: 3)
+      it '#query_get' do
+        actual = glob_context
+          .query_get('select &p1 as p1, &p2 as p2, &p3 as p3', p1: 1, p2: 2, p3: 3)
         actual.must_be_instance_of AssOle::Rubify::GenericWrapper
         actual.to_s.must_match %r{Query|Запрос}
-        actual.TempTableManager.to_s.must_match %{TempTableManager|МенеджерВременныхТаблиц}
-        value_table = actual.Execute.Upload
+        actual.TempTablesManager.to_s.must_match %r{TempTablesManager|МенеджерВременныхТаблиц}
+        value_table = actual.Execute.Unload
         value_table.Count.must_equal 1
         value_table.Get(0).p1.must_equal 1
         value_table.Get(0).p2.must_equal 2
         value_table.Get(0).p3.must_equal 3
       end
 
-      it '#ValueTabale' do
-        actual = glob_context.ValueTable(:col1, :col2, :col3) do |vt|
-          vt.must_be_instance_of AssOle::Rubify::GenericWrapper
-          3.times do |i|
-            vt.Add(col1: "v1 #{i}", col2: "v2 #{i}") do |row|
-              row.must_be_instance_of AssOle::Rubify::GenericWrapper
-            end
-          end
+      it '#query_get with block' do
+        vtable = glob_context.query_get('select &p1 as p1', p1: 1) do |q|
+          q.Execute.Unload
         end
-        actual.must_be_instance_of AssOle::Rubify::GenericWrapper
-        actual.to_s.must_match %r{ValueTable|ТаблицаЗначений}
+        vtable.Count.must_equal 1
+        vtable.Get(0).p1.must_equal 1
       end
     end
 
