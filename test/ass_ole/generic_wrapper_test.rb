@@ -87,6 +87,7 @@ module AssOle::RubifyTest
       describe 'fail' do
         it "if ole isn't WIN32OLE" do
           e = proc {
+            klass.any_instance.expects(:mixins_blend)
             klass.new(:invalid, ole_runtime_get)
           }.must_raise ArgumentError
           e.message.must_match %r{ole must be `WIN32OLE` instance}i
@@ -107,6 +108,8 @@ module AssOle::RubifyTest
           def initialize(ole, ole_runtime)
             super
           end
+
+          def mixins_blend; end
 
           def verify!; end
         end
