@@ -125,6 +125,26 @@ module AssOle
               end
             end
           end
+
+          # FIXME
+          module Map
+            def self.blend?(wr)
+              Collection._?(wr) && wr.to_s =~ %r{Map|Соответствие}i
+            end
+
+            def key?(key)
+              !Get(key).nil?
+            end
+
+            def [](key)
+              Get(key)
+            end
+
+            def []=(key, value)
+              Set(key, value)
+            end
+
+          end
         end
       end
     end
