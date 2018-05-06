@@ -132,4 +132,111 @@ module AssOle::RubifyTest
       end
     end
   end
+
+  describe AssOle::Rubify::GenericWrapper::Mixins do
+    like_ole_runtime Runtimes::Ext
+
+    describe 'Collection' do
+      def inst(*args, **opts, &block)
+        @inst ||= AssOle::Rubify::GenericWrapper
+          .new(ole_coll(*args, **opts, &block), ole_runtime_get)
+      end
+
+      def ole_coll(*args, **opts, &block)
+        fail 'Abstract method. Must return pure WIN32OLE collection'
+      end
+
+      describe 'OLE Array' do
+        include AssOle::Snippets::Shared::Array
+
+        def ole_coll(items = [1, 2, 3, 4, 5])
+          @ole_coll ||= array items
+        end
+
+        it 'must include Indexable' do
+          inst.singleton_class
+            .include? AssOle::Rubify::GenericWrapper::Mixins::Collection::Indexable
+        end
+
+        describe '#each' do
+          it 'without block' do
+            inst.each.must_be_instance_of AssOle::Rubify::GenericWrapper
+          end
+
+          it 'with block' do
+            times = 0
+
+            inst.each do |item|
+              times += 1
+              item.must_equal times
+            end.must_equal inst
+
+            times.must_equal 5
+          end
+        end
+
+        it '#each_with_index' do
+          times = 0
+
+          inst.each_with_index do |item, index|
+            times += 1
+            item.must_equal times
+            index.must_equal item - 1
+          end
+
+          times.must_equal 5
+        end
+
+        it '#map' do
+          inst.map(&:to_s).must_equal %w{1 2 3 4 5}
+        end
+
+        it '#size' do
+          inst.size.must_equal 5
+        end
+
+        it '#count' do
+          inst.count.must_equal 5
+        end
+
+        describe '#[index] when' do
+          it 'array is empty returns nil' do
+            inst([]).size.must_equal 0
+            inst[-1].must_be_nil
+            inst[0].must_be_nil
+            inst[1].must_be_nil
+          end
+
+          it 'index out of the range returns nil' do
+            inst.size.must_equal 5
+            inst[5].must_be_nil
+            inst[6].must_be_nil
+          end
+
+          it 'index in of the range returns item value' do
+            inst.size.must_equal 5
+            inst[0].must_equal 1
+            inst[3].must_equal 4
+            inst[4].must_equal 5
+          end
+
+          describe 'index < 0 will be reverse indexing' do
+            it 'index in of the rage returns item value' do
+              inst.size.must_equal 5
+              inst[-1].must_equal 5
+              inst[-2].must_equal 4
+              inst[-3].must_equal 3
+              inst[-4].must_equal 2
+              inst[-5].must_equal 1
+            end
+
+            it 'index out of range returns nil' do
+              inst.size.must_equal 5
+              inst[-6].must_be_nil
+            end
+          end
+        end
+      end
+    end
+  end
 end

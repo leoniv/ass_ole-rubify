@@ -26,39 +26,94 @@ module AssOle
           end
         end
 
-        module Indexable
+#FIXME         module Indexable
+#FIXME           extend Support::MixinsContainer
+#FIXME
+#FIXME           # @api private
+#FIXME           def self._?(wr)
+#FIXME             wr.quack.Indaex? || wr.quack.UBound?
+#FIXME           end
+#FIXME
+#FIXME           module Get
+#FIXME             def self.blend?(wr)
+#FIXME               wr.quack.Get? && Indexable._?(wr)
+#FIXME             end
+#FIXME
+#FIXME             # FIXME: example
+#FIXME             def [](index)
+#FIXME               send(:Get, index)
+#FIXME             end
+#FIXME           end
+#FIXME
+#FIXME           module Set
+#FIXME             def self.blend?(wr)
+#FIXME               wr.quack.Set? && Indexable._?(wr)
+#FIXME             end
+#FIXME
+#FIXME             # FIXME: example
+#FIXME             def []=(index, value)
+#FIXME               send(:Set, index, value)
+#FIXME             end
+#FIXME           end
+#FIXME         end
+
+        # FIXME
+        module Collection
           extend Support::MixinsContainer
 
-          # @api private
           def self._?(wr)
-            wr.quack.Indaex? || wr.quack.UBound?
+            wr.quack.Get? && wr.quack.Count?
           end
 
-          module Get
-            def self.blend?(wr)
-              wr.quack.Get? && Indexable._?(wr)
-            end
-
-            # FIXME: example
-            def [](index)
-              send(:Get, index)
-            end
-          end
-
-          module Set
-            def self.blend?(wr)
-              wr.quack.Set? && Indexable._?(wr)
-            end
-
-            # FIXME: example
-            def []=(index, value)
-              send(:Set, index, value)
-            end
-          end
-        end
-
-        module Collection
           # FIXME
+          module Indexable
+            include ::Enumerable
+            extend Support::MixinsContainer
+
+            def self.blend?(wr)
+              Collection._?(wr) && (wr.quack.IndexOf? || wr.quack.UBound?)
+            end
+
+            def each
+              Count().times do |i|
+                yield Get(i) if block_given?
+              end
+              self
+            end
+
+            def size
+              Count()
+            end
+
+            def empty?
+              size == 0
+            end
+
+            def last
+              get(size - 1)
+            end
+
+            def first
+              get(0)
+            end
+
+            def to_a
+              map do |item|
+                item
+              end
+            end
+
+            def get(index)
+              return if empty?
+              return if index > size - 1
+              if index < 0
+                return if size < index.abs
+                return Get(size + index)
+              end
+              Get(index)
+            end
+            alias_method :[], :get
+          end
         end
       end
     end
