@@ -137,8 +137,8 @@ module AssOle::RubifyTest
     like_ole_runtime Runtimes::Ext
 
     describe 'Collection' do
-      def coll_wrapper(size = 5)
-        @coll_wrapper ||= AssOle::Rubify::GenericWrapper
+      def collection_wrapper(size = 5)
+        @collection_wrapper ||= AssOle::Rubify::GenericWrapper
           .new(ole_coll(size), ole_runtime_get)
       end
 
@@ -151,7 +151,7 @@ module AssOle::RubifyTest
           extend Minitest::Spec::DSL
 
           it 'must include Indexable' do
-            coll_wrapper.singleton_class
+            collection_wrapper.singleton_class
               .include? AssOle::Rubify::GenericWrapper::Mixins::Collection::Indexable
           end
         end
@@ -163,7 +163,7 @@ module AssOle::RubifyTest
           def value_table_collection(size)
             value_table :c1, :c2, :c3 do |vt|
               size.times do |i|
-                vt.add с1: "c1 #{i}", c2: "c2 #{i}", c3: "c3 #{i}"
+                vt.add c1: "c1 #{i}", c2: "c2 #{i}", c3: "c3 #{i}"
               end
             end
           end
@@ -172,6 +172,24 @@ module AssOle::RubifyTest
             @ole_coll ||= value_table_collection(size)
           end
 
+          describe '#each' do
+            it 'without block' do
+              collection_wrapper.each.must_be_instance_of AssOle::Rubify::GenericWrapper
+            end
+
+            it 'with block' do
+              times = 0
+
+              collection_wrapper.each_with_index do |row, row_index|
+                [:c1, :c2, :c3].each_with_index do |column, column_index|
+                  row.send(column).must_equal "#{column} #{column_index}"
+                  times += 1
+                end
+              end.must_equal collection_wrapper
+
+              times.must_equal 5 * 3
+            end
+          end
         end
 
         describe 'Array' do
@@ -189,16 +207,16 @@ module AssOle::RubifyTest
 
           describe '#each' do
             it 'without block' do
-              coll_wrapper.each.must_be_instance_of AssOle::Rubify::GenericWrapper
+              collection_wrapper.each.must_be_instance_of AssOle::Rubify::GenericWrapper
             end
 
             it 'with block' do
               times = 0
 
-              coll_wrapper.each do |item|
+              collection_wrapper.each do |item|
                 times += 1
                 item.must_equal times
-              end.must_equal coll_wrapper
+              end.must_equal collection_wrapper
 
               times.must_equal 5
             end
@@ -207,7 +225,7 @@ module AssOle::RubifyTest
           it '#each_with_index' do
             times = 0
 
-            coll_wrapper.each_with_index do |item, index|
+            collection_wrapper.each_with_index do |item, index|
               times += 1
               item.must_equal times
               index.must_equal item - 1
@@ -217,51 +235,51 @@ module AssOle::RubifyTest
           end
 
           it '#map' do
-            coll_wrapper.map(&:to_s).must_equal %w{1 2 3 4 5}
+            collection_wrapper.map(&:to_s).must_equal %w{1 2 3 4 5}
           end
 
           it '#size' do
-            coll_wrapper.size.must_equal 5
+            collection_wrapper.size.must_equal 5
           end
 
           it '#count' do
-            coll_wrapper.count.must_equal 5
+            collection_wrapper.count.must_equal 5
           end
 
           describe '#[index] when' do
             it 'collection is empty returns nil' do
-              coll_wrapper(0).size.must_equal 0
-              coll_wrapper[-1].must_be_nil
-              coll_wrapper[0].must_be_nil
-              coll_wrapper[1].must_be_nil
+              collection_wrapper(0).size.must_equal 0
+              collection_wrapper[-1].must_be_nil
+              collection_wrapper[0].must_be_nil
+              collection_wrapper[1].must_be_nil
             end
 
             it 'index out of the range returns nil' do
-              coll_wrapper.size.must_equal 5
-              coll_wrapper[5].must_be_nil
-              coll_wrapper[6].must_be_nil
+              collection_wrapper.size.must_equal 5
+              collection_wrapper[5].must_be_nil
+              collection_wrapper[6].must_be_nil
             end
 
             it 'index in of the range returns item value' do
-              coll_wrapper.size.must_equal 5
-              coll_wrapper[0].must_equal 1
-              coll_wrapper[3].must_equal 4
-              coll_wrapper[4].must_equal 5
+              collection_wrapper.size.must_equal 5
+              collection_wrapper[0].must_equal 1
+              collection_wrapper[3].must_equal 4
+              collection_wrapper[4].must_equal 5
             end
 
             describe 'index < 0 will be reverse indexing' do
               it 'index in of the rage returns item value' do
-                coll_wrapper.size.must_equal 5
-                coll_wrapper[-1].must_equal 5
-                coll_wrapper[-2].must_equal 4
-                coll_wrapper[-3].must_equal 3
-                coll_wrapper[-4].must_equal 2
-                coll_wrapper[-5].must_equal 1
+                collection_wrapper.size.must_equal 5
+                collection_wrapper[-1].must_equal 5
+                collection_wrapper[-2].must_equal 4
+                collection_wrapper[-3].must_equal 3
+                collection_wrapper[-4].must_equal 2
+                collection_wrapper[-5].must_equal 1
               end
 
               it 'index out of range returns nil' do
-                coll_wrapper.size.must_equal 5
-                coll_wrapper[-6].must_be_nil
+                collection_wrapper.size.must_equal 5
+                collection_wrapper[-6].must_be_nil
               end
             end
           end
