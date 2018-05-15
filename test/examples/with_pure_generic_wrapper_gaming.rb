@@ -62,5 +62,13 @@ module AssOle::RubifyTest
         folder3.Parent.Description.must_equal 'Folder 1'
       end
     end
+
+    describe 'gaiming with collections' do
+      like_rubify_runtime Runtimes::Ext
+      it 'Metadata.Documents' do
+        mEtadata.Catalogs.map(&:to_s)
+          .must_equal %w{Catalog1 Catalog2 Catalog3}
+      end
+    end
   end
 end
