@@ -28,10 +28,10 @@ module AssOle
 
         # Mixins for 1C collections like a Array, ValueTable etc.
         # Collection is a all ole objects responds to :Count and :Get.
-        # Any collections is {Indexable} with Fixnum index
+        # Some collections which {Indexable} with Fixnum index
         # will be ::Enumerable. But 1C Structure and Map can't
         # be Enumerable :(
-        # If collection writable {Indexable::Set}
+        # If collection is writable, {Indexable::Set}
         # and {Add} mixins will be included.
         module Collection
           extend Support::MixinsContainer
@@ -131,6 +131,7 @@ module AssOle
             #     end
             #   end
             #   a.Get(10) #=> WIN32OLERuntimeError index out of range
+            #   a.get(10) #=> nil
             #   a[0] #=> 0
             #   a[4] #=> 4
             #   a[5] #=> nil
@@ -149,7 +150,7 @@ module AssOle
             alias_method :[], :get
 
             # Mixin for {Indexable} and writable 1C {Collection}
-            # which ole responds to :Set
+            # which responds to ole method :Set
             module Set
               # All ole {Indexable} {Collection} ole responds to :Set
               def self.blend?(wr)
@@ -177,7 +178,7 @@ module AssOle
           end
 
           # Mixin for writable 1C {Collection}
-          # which ole responds to :Add
+          # which responds to ole method :Add
           module Add
             # All ole {Collection} which ole responds to :Add
             def self.blend?(wr)
@@ -195,7 +196,7 @@ module AssOle
             end
           end
 
-          # Mixin for 1C Map
+          # Mixin for 1C Map.
           # Unfortunately 1C Map can't be ::Enumerable
           module Map
             def self.blend?(wr)
@@ -225,7 +226,7 @@ module AssOle
               Get((key.is_a?(Symbol) ? key.to_s : key))
             end
 
-            # Alias for ole method Insert()
+            # Alias for ole method Insert() but returns value
             # @example
             #   m = newObject('Map')
             #   m.Insert('key', 'value') #=> nil
@@ -255,7 +256,8 @@ module AssOle
               Property((key.is_a?(Symbol) ? key.to_s : key))
             end
 
-            # Alias for ole Structure propery reader
+            # Alias for ole Structure property reader but doesn't fail
+            # when property (or key) not exists.
             # @example
             #   s = newObject('Structure')
             #   s.key #=> WIN32OLERuntimeError
@@ -267,7 +269,7 @@ module AssOle
               ole.send(key.to_s) if key?(key)
             end
 
-            # Alias for ole method Insert()
+            # Alias for ole method Insert() but returns value
             # @example
             #   s = newObject('Structure')
             #   s.key = 'value' #=> WIN32OLERuntimeError
