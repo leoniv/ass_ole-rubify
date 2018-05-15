@@ -233,8 +233,7 @@ module AssOle
             #   m[:key] = 'value' #=> 'value'
             #   m['key'] = 'value' #=> 'value'
             def []=(key, value)
-              Insert(key, value)
-              value
+              Insert((key.is_a?(Symbol) ? key.to_s : key), value)
             end
           end
 
@@ -266,7 +265,7 @@ module AssOle
             #   s[:key] #=> 'value'
             #   s['key'] #=> 'value'
             def [](key)
-              ole.send(key.to_s) if key?(key)
+              ole.send(key.to_s.upcase) if key?(key)
             end
 
             # Alias for ole method Insert() but returns value
@@ -278,7 +277,6 @@ module AssOle
             #   s['key'] = 'value' #=> 'value'
             def []=(key, value)
               Insert(key.to_s, value)
-              value
             end
           end
         end

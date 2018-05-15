@@ -296,8 +296,14 @@ module AssOle::RubifyTest
             it '#[]=' do
               inst = collection_wrapper
               (inst[:key] = 'value').must_equal 'value'
-              inst['key'] = 'value'
               inst[:key].must_equal 'value'
+              inst['key'].must_equal 'value'
+              inst['key'] = 'other value'
+              inst[:key].must_equal 'other value'
+              inst['key'].must_equal 'other value'
+              inst.Count.must_equal 1
+              inst[:class] = 'class name'
+              inst[:class].must_equal 'class name'
             end
           end
         end
