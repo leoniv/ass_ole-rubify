@@ -86,14 +86,14 @@ module AssOle
               self
             end
 
-            # True if collection {#size} == 0
+            # True if collection Count() == 0
             def empty?
-              size == 0
+              Count() == 0
             end
 
             # Return last item
             def last
-              get(size - 1)
+              get(Count() - 1)
             end
 
             # Return first item
@@ -134,10 +134,10 @@ module AssOle
             #   a[-6] #=> nil
             def get(index)
               return if empty?
-              return if index > size - 1
+              return if index > Count() - 1
               if index < 0
-                return if size < index.abs
-                return Get(size + index)
+                return if Count() < index.abs
+                return Get(Count() + index)
               end
               Get(index)
             end
