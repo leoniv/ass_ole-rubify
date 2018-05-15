@@ -10,7 +10,7 @@ module AssOle::RubifyTest
           .new(ole_coll(size, **opts), ole_runtime_get)
       end
 
-      def ole_coll(size)
+      def ole_coll(size, **opts)
         fail 'Abstract method. Must return pure WIN32OLE collection'
       end
 
@@ -33,7 +33,7 @@ module AssOle::RubifyTest
             array(*(1 .. size).to_a)
           end
 
-          def ole_coll(size)
+          def ole_coll(size, **_)
             @ole_coll ||= array_collection(size)
           end
 
@@ -129,7 +129,7 @@ module AssOle::RubifyTest
             end
           end
 
-          def ole_coll(size)
+          def ole_coll(size, **_)
             @ole_coll ||= value_table_collection(size)
           end
 
@@ -194,7 +194,7 @@ module AssOle::RubifyTest
         describe 'Set' do
           include AssOle::Snippets::Shared::Array
 
-          def ole_coll(_)
+          def ole_coll(_, **__)
             array 1, 2, 3, 4
           end
 
