@@ -1,11 +1,11 @@
 module AssOle
   module Rubify
     class GenericWrapper
-      # Dynamically blended mixins for {GenericWrapper} instances
-      # All modules included in {Mixins} name space
+      # Dynamically blended mixins for {GenericWrapper} instances.
+      # All modules included in {Mixins} namespace
       # must implements {Support::MixinInterface#blend?} which
       # returns +true+ if wrapper must be extended by this
-      # mixin
+      # mixin.
       # @example (see Support::MixinInterface)
       module Mixins
         extend Support::MixinsContainer
@@ -26,54 +26,59 @@ module AssOle
           end
         end
 
-#FIXME         module Indexable
-#FIXME           extend Support::MixinsContainer
-#FIXME
-#FIXME           # @api private
-#FIXME           def self._?(wr)
-#FIXME             wr.quack.Indaex? || wr.quack.UBound?
-#FIXME           end
-#FIXME
-#FIXME           module Get
-#FIXME             def self.blend?(wr)
-#FIXME               wr.quack.Get? && Indexable._?(wr)
-#FIXME             end
-#FIXME
-#FIXME             # FIXME: example
-#FIXME             def [](index)
-#FIXME               send(:Get, index)
-#FIXME             end
-#FIXME           end
-#FIXME
-#FIXME           module Set
-#FIXME             def self.blend?(wr)
-#FIXME               wr.quack.Set? && Indexable._?(wr)
-#FIXME             end
-#FIXME
-#FIXME             # FIXME: example
-#FIXME             def []=(index, value)
-#FIXME               send(:Set, index, value)
-#FIXME             end
-#FIXME           end
-#FIXME         end
-
-        # FIXME
+        # Mixins for 1C collections like a Array, ValueTable etc.
+        # Collection is a all ole objects responds to :Count and :Get.
+        # Any collections is {Indexable} with Fixnum index
+        # will be ::Enumerable. But 1C Structure and Map can't
+        # be Enumerable :(
+        # If collection writable {Indexable::Set}
+        # and {Add} mixins will be included.
         module Collection
           extend Support::MixinsContainer
 
+          # Collection is a all ole objects responds to :Count and :Get
           def self._?(wr)
             wr.quack.Get? && wr.quack.Count?
           end
 
-          # FIXME
+          # Mixin for 1C collections which indexable with Fixnum index
+          # and can be Enumerable.
+          # Indexable ole collection is all {Collection}
+          # responds to :IndexOf && :UBound
+          # @example :Enumerable
+          #   a = newObject('Array') do
+          #     3.times do |v|
+          #       a << v + 1
+          #     end
+          #   end #=> GenericWrapper
+          #
+          #   a.map(&:to_s) #=> ["1", "2", "3"]
+          #
+          #   a.each_with_index do |item, index|
+          #     puts "a[#{index}] = #{item}"
+          #   end #=> GenericWrapper
           module Indexable
             include ::Enumerable
             extend Support::MixinsContainer
 
+            # Indexable ole collection is all {Collection}
+            # responds to :IndexOf && :UBound
             def self.blend?(wr)
               Collection._?(wr) && (wr.quack.IndexOf? || wr.quack.UBound?)
             end
 
+            # @example
+            #  a = newObject('Array') do |a|
+            #    3.times do |i|
+            #      a.Add(i)
+            #    end
+            #  end #=> GenericWrapper
+            #
+            #  a.each #=> GenericWrapper
+            #  a.each do |item|
+            #    puts item
+            #  end #=> GenericWrapper
+            # @return [self]
             def each
               Count().times do |i|
                 yield Get(i) if block_given?
@@ -81,28 +86,57 @@ module AssOle
               self
             end
 
+            # Alias for ole method Count()
+            # @return [Fixnum]
             def size
               Count()
             end
 
+            # True if collection {#size} == 0
             def empty?
               size == 0
             end
 
+            # Return last item
             def last
               get(size - 1)
             end
 
+            # Return first item
             def first
               get(0)
             end
 
+            # @return [Array]
+            # @example
+            #   a = newObject('Arra') do |a|
+            #     a.Add(0)
+            #     a.Add(1)
+            #   end #=> GenericWrapper
+            #
+            #   a.to_a #=> [0, 1]
             def to_a
               map do |item|
                 item
               end
             end
 
+            # Alias for ole method Get(index) but without fail
+            # when index out of range and accepts index < 0 like
+            # Ruby Array
+            # @example
+            #   a = newObject('Array') do |a|
+            #     5.times do |i|
+            #       a.Add(i)
+            #     end
+            #   end
+            #   a.Get(10) #=> WIN32OLERuntimeError index out of range
+            #   a[0] #=> 0
+            #   a[4] #=> 4
+            #   a[5] #=> nil
+            #   a[-1] #=> 4
+            #   a[-5] #=> 0
+            #   a[-6] #=> nil
             def get(index)
               return if empty?
               return if index > size - 1
@@ -114,20 +148,55 @@ module AssOle
             end
             alias_method :[], :get
 
-            # FIXME
+            # Mixin for {Indexable} and writable 1C {Collection}
+            # which ole responds to :Set
             module Set
+              # All ole {Indexable} {Collection} ole responds to :Set
               def self.blend?(wr)
                 Indexable.blend?(wr) && wr.quack.Set?
               end
 
+              # Alias for ole method Set(index, value) but returns value
+              # @example
+              #  a = newObject('Array') do |a|
+              #    3.time do |i|
+              #      a.Add(i)
+              #    end
+              #  end #=> GenericWrapper
+              #
+              #  a[0] #=> 0
+              #  a.Set(0, 10) #=> nil
+              #  a[0] = 10 #=> 10
+              #  a[0] #=> 10
+              #  a[10] = 0 #=> WIN32OLERuntimeError Index out of range
+              # @raise [WIN32OLERuntimeError] when index out of range
               def []=(index, value)
                 Set(index, value)
               end
             end
           end
 
+          # Mixin for writable 1C {Collection}
+          # which ole responds to :Add
+          module Add
+            # All ole {Collection} which ole responds to :Add
+            def self.blend?(wr)
+              Collection._?(wr) && wr.quack.Add?
+            end
+
+            # Alias for ole method Add but returns value
+            # @example
+            #   a = newObject('Array')
+            #   a.Add(10) #=> nil
+            #   a << 10 #=> 10
+            def <<(value)
+              Add(value)
+              value
+            end
+          end
+
           # Mixin for 1C Map
-          # Unfortunatly 1C Map can't be ::Enumerable
+          # Unfortunately 1C Map can't be ::Enumerable
           module Map
             def self.blend?(wr)
               Collection._?(wr) && wr.to_s =~ %r{Map|Соответствие}i
@@ -144,7 +213,7 @@ module AssOle
               !Get((key.is_a?(Symbol) ? key.to_s : key)).nil?
             end
 
-            # Aliase for ole method Get()
+            # Alias for ole method Get()
             # @example
             #   m = newObject('Structure')
             #   m['key'] #=> nil
@@ -156,7 +225,7 @@ module AssOle
               Get((key.is_a?(Symbol) ? key.to_s : key))
             end
 
-            # Aliase for ole method Insert()
+            # Alias for ole method Insert()
             # @example
             #   m = newObject('Map')
             #   m.Insert('key', 'value') #=> nil
@@ -169,7 +238,7 @@ module AssOle
           end
 
           # Mixin for 1C Structure.
-          # Unfortunatly 1C Structure can't be ::Enumerable
+          # Unfortunately 1C Structure can't be ::Enumerable
           module Structure
             def self.blend?(wr)
               wr.quack.Property? && wr.to_s =~ %r{Structure|Структура}i
@@ -186,7 +255,7 @@ module AssOle
               Property((key.is_a?(Symbol) ? key.to_s : key))
             end
 
-            # Aliase for ole Structure propery reader
+            # Alias for ole Structure propery reader
             # @example
             #   s = newObject('Structure')
             #   s.key #=> WIN32OLERuntimeError
@@ -198,7 +267,7 @@ module AssOle
               ole.send(key.to_s) if key?(key)
             end
 
-            # Aliase for ole method Insert()
+            # Alias for ole method Insert()
             # @example
             #   s = newObject('Structure')
             #   s.key = 'value' #=> WIN32OLERuntimeError

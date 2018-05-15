@@ -130,7 +130,7 @@ module AssOle
       module MixinInterface
         # Returns +true+ if +wrapper+ must be extended by this mixin
         # @param wrapper [GenericWrapper]
-        # @example Writes mixin example
+        # @example Create new mixin
         #   module AssOle::Rubify::GenericWrapper::Mixins
         #     module Write
         #       def self.blend?(wrapper)

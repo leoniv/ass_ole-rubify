@@ -61,7 +61,7 @@ module AssOle::RubifyTest
               times += 1
               item.must_equal times
               index.must_equal item - 1
-            end
+            end.must_equal collection_wrapper
 
             times.must_equal 5
           end
@@ -135,7 +135,8 @@ module AssOle::RubifyTest
 
           describe '#each' do
             it 'without block' do
-              collection_wrapper.each.must_be_instance_of AssOle::Rubify::GenericWrapper
+              collection_wrapper.each
+                .must_be_instance_of AssOle::Rubify::GenericWrapper
             end
 
             it 'with block' do
@@ -212,6 +213,27 @@ module AssOle::RubifyTest
               }.must_raise WIN32OLERuntimeError
               e.message.must_match %r{выходит за границы диапазона}i
             end
+          end
+        end
+      end
+
+      describe 'Add' do
+        include AssOle::Snippets::Shared::Array
+
+        def ole_coll(_, **__)
+          array 1, 2, 3, 4
+        end
+
+        it '#<<' do
+          collection_wrapper.size.must_equal 4
+          (10 .. 13).to_a.each do |v|
+            (collection_wrapper << v).must_equal v
+          end
+
+          collection_wrapper.size.must_equal 8
+
+          (10 .. 13).to_a.each_with_index do |v, i|
+            collection_wrapper[i + 4].must_equal v
           end
         end
       end
