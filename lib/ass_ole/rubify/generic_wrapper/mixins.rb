@@ -126,24 +126,89 @@ module AssOle
             end
           end
 
-          # FIXME
+          # Mixin for 1C Map
+          # Unfortunatly 1C Map can't be ::Enumerable
           module Map
             def self.blend?(wr)
               Collection._?(wr) && wr.to_s =~ %r{Map|Соответствие}i
             end
 
+            # @example
+            #   m = newObject('Map')
+            #   m.key? :key #=> false
+            #   m.key? 'key' #=> false
+            #   m.Insert('key', 'value')
+            #   m.key? :key #=> true
+            #   m.key? 'key' #=> true
             def key?(key)
-              !Get(key).nil?
+              !Get((key.is_a?(Symbol) ? key.to_s : key)).nil?
             end
 
+            # Aliase for ole method Get()
+            # @example
+            #   m = newObject('Structure')
+            #   m['key'] #=> nil
+            #   m[:key]  #=> nil
+            #   m.Insert('key', 'value') #=> nil
+            #   m[:key] #=> 'value'
+            #   m['key'] #=> 'value'
             def [](key)
-              Get(key)
+              Get((key.is_a?(Symbol) ? key.to_s : key))
             end
 
+            # Aliase for ole method Insert()
+            # @example
+            #   m = newObject('Map')
+            #   m.Insert('key', 'value') #=> nil
+            #   m[:key] = 'value' #=> 'value'
+            #   m['key'] = 'value' #=> 'value'
             def []=(key, value)
-              Set(key, value)
+              Insert(key, value)
+              value
+            end
+          end
+
+          # Mixin for 1C Structure.
+          # Unfortunatly 1C Structure can't be ::Enumerable
+          module Structure
+            def self.blend?(wr)
+              wr.quack.Property? && wr.to_s =~ %r{Structure|Структура}i
             end
 
+            # @example
+            #   s = newObject('Structure')
+            #   s.key? :key #=> false
+            #   s.key? 'key' #=> false
+            #   s.Insert('key', 'value')
+            #   s.key? :key #=> true
+            #   s.key? 'key' #=> true
+            def key?(key)
+              Property((key.is_a?(Symbol) ? key.to_s : key))
+            end
+
+            # Aliase for ole Structure propery reader
+            # @example
+            #   s = newObject('Structure')
+            #   s.key #=> WIN32OLERuntimeError
+            #   s[:key] #=> nil
+            #   s.Insert('key', 'value')
+            #   s[:key] #=> 'value'
+            #   s['key'] #=> 'value'
+            def [](key)
+              ole.send(key.to_s) if key?(key)
+            end
+
+            # Aliase for ole method Insert()
+            # @example
+            #   s = newObject('Structure')
+            #   s.key = 'value' #=> WIN32OLERuntimeError
+            #   s.Insert('key', 'value') #=> nil
+            #   s[:key] = 'value' #=> 'value'
+            #   s['key'] = 'value' #=> 'value'
+            def []=(key, value)
+              Insert(key.to_s, value)
+              value
+            end
           end
         end
       end

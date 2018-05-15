@@ -5,9 +5,9 @@ module AssOle::RubifyTest
     like_ole_runtime Runtimes::Ext
 
     describe 'Collection' do
-      def collection_wrapper(size = 5)
+      def collection_wrapper(size = 5, **opts)
         @collection_wrapper ||= AssOle::Rubify::GenericWrapper
-          .new(ole_coll(size), ole_runtime_get)
+          .new(ole_coll(size, **opts), ole_runtime_get)
       end
 
       def ole_coll(size)
@@ -211,6 +211,71 @@ module AssOle::RubifyTest
                 collection_wrapper[10] = 42
               }.must_raise WIN32OLERuntimeError
               e.message.must_match %r{выходит за границы диапазона}i
+            end
+          end
+        end
+      end
+
+      describe '(Structure|Map)' do
+        alias_method :structure, :collection_wrapper
+
+        def obj_type
+          fail 'Abstract must returns (Map|Structure)'
+        end
+
+        %w{Map Structure}.each do |type|
+          describe type do
+            def ole_coll(*_, **keys)
+              obj = newObject(obj_type)
+              keys.each do |k, v|
+                obj.insert(k.to_s, v)
+              end
+              obj
+            end
+
+            define_method :obj_type do
+              type
+            end
+
+            it "must include #{type}" do
+              collection_wrapper.singleton_class
+                .include? eval 'AssOle::Rubify::GenericWrapper::'\
+                               "Mixins::Collection::#{type}"
+            end
+
+            describe '#[]' do
+              it 'when has key?' do
+                collection_wrapper(key: 'value')[:key].must_equal 'value'
+                collection_wrapper['key'].must_equal 'value'
+              end
+
+              it 'when hasn\'t key?' do
+                collection_wrapper[:key].must_be_nil
+                collection_wrapper['key'].must_be_nil
+              end
+            end
+
+            describe '#key?' do
+              it 'when key is a Symbol' do
+                collection_wrapper(key: 'value').key?(:key).must_equal true
+                collection_wrapper.key?(:fakekey).must_equal false
+              end
+
+              it 'when key is String' do
+                collection_wrapper(key: 'value').key?('key').must_equal true
+                collection_wrapper.key?('fakekey').must_equal false
+              end
+
+              it 'when key is Object' do
+                collection_wrapper.key?(newObject('Array')).must_equal false
+              end
+            end
+
+            it '#[]=' do
+              inst = collection_wrapper
+              (inst[:key] = 'value').must_equal 'value'
+              inst['key'] = 'value'
+              inst[:key].must_equal 'value'
             end
           end
         end
