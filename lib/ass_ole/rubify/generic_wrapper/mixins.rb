@@ -86,12 +86,6 @@ module AssOle
               self
             end
 
-            # Alias for ole method Count()
-            # @return [Fixnum]
-            def size
-              Count()
-            end
-
             # True if collection {#size} == 0
             def empty?
               size == 0
@@ -174,6 +168,20 @@ module AssOle
               def []=(index, value)
                 Set(index, value)
               end
+            end
+          end
+
+          # Mixin for all collections provides {#size} method like in Ruby
+          module Count
+            # Suitable for all {Collection}
+            def self.blend?(wr)
+              wr.quack.Count?
+            end
+
+            # Alias for ole method Count()
+            # @return [Fixnum]
+            def size
+              Count()
             end
           end
 

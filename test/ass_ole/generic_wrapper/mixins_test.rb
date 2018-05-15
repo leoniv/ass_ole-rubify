@@ -305,6 +305,11 @@ module AssOle::RubifyTest
               inst[:class] = 'class name'
               inst[:class].must_equal 'class name'
             end
+
+            it '#size' do
+              collection_wrapper(k1: nil, k2: nil, k3: nil)
+                .size.must_equal 3
+            end
           end
         end
       end
