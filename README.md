@@ -5,27 +5,54 @@ It's a part of [ass_ole](https://github.com/leoniv/ass_ole) stack. Gem
 over 1C `WIN32OLE` objects easly and shortly as the traditional `Ruby`
 scripting.
 
-All wrappers is kinde of `AssOle::Rubify::GenericWrapper` and always holds two
-things. First thing `ole` is a wrapped `WIN32OLE` object. Second thing
-`ole_runtime` is a 1C ole connector which spawned the `ole` object
-(`ole_runtime` recognize `ole` as native 1C object but not a `ComObject`).
+General class in this gem is the `GenericWrapper`. `GenericWrapper` always holds
+two things. First thing is the wrapped `WIN32OLE` object. Second thing is the
+1C ole runtime (ComConnector) which spawned the `WIN32OLE` object.
 
-`GenericWrapper` provides generic API and all missing method sends to `ole` in
-`method_missing` handler. Custom wrappers provides custom API depended
-on type of `ole`.
+`GenericWrapper` sends all missing method to `WIN32OLE` object in the
+`method_missing` handler.
 
-All custom wrappers, can includes various mixins for dynamic generated
-wrapper API and always yields instance in end of constructor where instance
-can be extended would you like.
+Next main thing in this gem is the `GenericWrapper::Mixins`. Mixins provides
+methods for "rubify" `WIN32OLE` objects wrapped in the `GenericWrapper`.
 
-FIXME:
->  Custom wrappers included into `AssOle::Rubify::SchemaObjects` namespace
->  wrapps objects defined in 1C application *Meta Data Tree*.
->  In 1C term sach objects named as *Applied Objects*.
->  All wrappers from `SchemaObjects` holds therd thing `md_manger` instance wich
->  wrapp *Objects manager* like *Catalogs.CatalogName*, *Documents.DocumentName*
->  etc. Wrappers for `md_manger` dynamicaly generated in
->  `AssOle::Rubify::MdManagers` namespace for specific 1C application instance.
+All modules from `GenericWrapper::Mixins` namespace automatically includes in
+the `GenericWrapper` instances depending on the `WIN32OLE` object type.
+
+Third thing of this gem is the `GlobContext` - special wrapper for
+"global context" and wrapping `NewObject` ole method for wrapping all `WIN32OLE`
+in `GenericWrapper`.
+
+`GlobContext` also has `GlobContext::Mixins` which includes in
+the `GlobContext` depending on the ole runtime type. `GlobContext::Mixins` isn't
+provides any methods and defined for customize they as you need in your
+application. Except only `GlobContext::Mixins::ServerContext` provides `#query`
+wrapper.
+
+## About `GenericWrapper::Mixins`
+
+TODO: write this
+
+## General usage
+
+You can usage `GenericWrapper` as standalone class and wrapping selected
+`WIN32OLE` objects manually with `Rubify.rubify` or `Rubify#rubify` methods.
+
+Also you can usage `GlobContext` wrapper which automatically wrapping all
+`WIN32OLE` in `GenericWrapper`. For it you should define your class or module
+as `like_rubify_runtime YourOleRuntime`:
+```
+class Foo
+  like_rubify_runtime Runtimes::External
+  ...
+end
+```
+
+And last general usage case is to write own wrapper class, child of the
+`GenericWrapper` and own wrapper mixins. But this case needs a some
+explanations.
+
+TODO: write about make custom wrapper class.
+
 
 ## Main profit from Rubify
 
