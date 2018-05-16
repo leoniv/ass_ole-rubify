@@ -310,6 +310,12 @@ module AssOle::RubifyTest
               collection_wrapper(k1: nil, k2: nil, k3: nil)
                 .size.must_equal 3
             end
+
+            it '#empty?' do
+              collection_wrapper.empty?.must_equal true
+              collection_wrapper[:key] = 'value'
+              collection_wrapper.empty?.must_equal false
+            end
           end
         end
       end

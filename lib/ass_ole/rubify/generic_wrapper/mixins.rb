@@ -86,11 +86,6 @@ module AssOle
               self
             end
 
-            # True if collection Count() == 0
-            def empty?
-              Count() == 0
-            end
-
             # Return last item
             def last
               get(Count() - 1)
@@ -182,6 +177,11 @@ module AssOle
             # @return [Fixnum]
             def size
               Count()
+            end
+
+            # True if collection Count() == 0
+            def empty?
+              Count() == 0
             end
           end
 
