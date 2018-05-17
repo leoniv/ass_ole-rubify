@@ -19,8 +19,8 @@ All modules from `GenericWrapper::Mixins` namespace automatically includes in
 the `GenericWrapper` instances depending on the `WIN32OLE` object type.
 
 Third thing of this gem is the `GlobContext` - special wrapper for
-"global context" and wrapping `NewObject` ole method for wrapping all `WIN32OLE`
-in `GenericWrapper`.
+"global context" methods like a `NewObject` etc for wrapping all `WIN32OLE`
+in the `GenericWrapper`.
 
 `GlobContext` also has `GlobContext::Mixins` which includes in
 the `GlobContext` depending on the ole runtime type. `GlobContext::Mixins` isn't
